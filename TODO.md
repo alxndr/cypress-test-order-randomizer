@@ -16,6 +16,7 @@ Let's aim to test-drive our code where possible.
 
 Cypress v15 (current: v15.14.1) requires Node.js 20+. Our package targets `>=22.0.0`.
 
+
 ### Plugin registration
 
 Users add this to their `cypress.config.js` or `cypress.config.ts`:
@@ -49,10 +50,12 @@ export default defineConfig({
 - [ ] Listen to `file.on('close', ...)` to clean up watchers
 - [ ] Emit `file.emit('rerun')` after reprocessing a changed file
 
+
 ### File ordering
 
 - [ ] Modify `config.specPattern` (array of absolute paths) before returning from `setupNodeEvents`
     - Cypress does not guarantee execution order from an array (open issues #31758, #29067), so this is best-effort
+
 
 ### Bundling
 
@@ -63,54 +66,25 @@ export default defineConfig({
 
 ## core
 
-- [x] `src/seeded-random.ts` — counter-mode SHA-256 PRNG (via `node:crypto`) + Fisher-Yates shuffle; accepts `string | number` seed
-- [x] `src/block-randomizer.ts` — AST transform: shuffle `describe`/`it`/`test`/`context` blocks using `@babel/parser` + `@babel/generator`
-- [x] `src/file-randomizer.ts` — resolve `specPattern` globs with `fast-glob`, shuffle file list
-- [x] `src/preprocessor.ts` — esbuild-based `createPreprocessor` with AST esbuild plugin; handles watcher caching + `close`/`rerun` lifecycle
-- [x] `src/index.ts` — `definePlugin(on, config, options)` entry point; re-exports `transformCode` for advanced use
+- [ ] discuss increase seeding randomness?
+  * comment in e2e test suite says "3! = 6; ~17% chance seed=42 happens to preserve order — acceptable" ... but can we make it more likely that the seed value produces a unique run order? perhaps seeds need to be longer to provide that guarantee?
 
 
 ## user-experience
 
 These options will be tested in the forthcoming integration tests...
 
-- [ ] `randomizeFiles` option (boolean, default `true`) — whether to shuffle spec file order
-- [ ] `randomizeBlocks` option (boolean, default `true`) — whether to shuffle `describe`/`it` blocks within files
-- [ ] `seed` option (string | number, optional) — fixed seed for reproducible runs; defaults to a random seed logged to stdout
-
-### Cypress `--env` passthrough
-
-Users should be able to override plugin options from the command line without changing `cypress.config.ts`:
-
-```
-npx cypress run --env seed=42
-npx cypress run --env seed=42,randomizeBlocks=false
-```
-
-**Implemented.** The correct priority order is:
-
-1. `config.env.seed` / `config.env.randomizeFiles` / `config.env.randomizeBlocks` — CLI `--env` flag or `env:` block in `cypress.config.ts`; wins over everything so CI and one-off runs can always override
-2. `options.seed` / `options.randomizeFiles` / `options.randomizeBlocks` — programmatic defaults set in `setupNodeEvents`; version-controlled project defaults
-3. Built-in defaults (`randomizeFiles: true`, `randomizeBlocks: true`, random seed)
-
-The `CypressPluginConfig` interface needs `env?: Record<string, unknown>` added, and string-to-boolean coercion is needed for `randomizeFiles`/`randomizeBlocks` (all `--env` values arrive as strings).
-
-**The `options` object is fully optional** — once `--env` passthrough is in place, `definePlugin(on, config)` (no third argument) is a valid and complete configuration for users who want to control everything from the CLI.
-
-**The registration line itself is irreducible.** Cypress v15 requires explicit `setupNodeEvents` wiring; there is no auto-registration path. The minimum viable `cypress.config.ts` touchpoint is:
-
-```typescript
-setupNodeEvents(on, config) {
-  return definePlugin(on, config)
-}
-```
+- [ ] verify that the three configuration options (`randomizeFiles`, `randomizeBlocks`, `seed`) can be set via calling the `defineConfig` function or via passing env vars
+    - [ ] verify that values passed with env vars supercede the configuration set via the `defineConfig` function
 
 
 ## tests
 
-- [ ] ensure that we are asserting on the various structures that are in the integration suite's test examples in fixtures
-- [ ] set up CI running static analysis and tests, using GitHub Actions (triggered by all branches)
-  - use `npm ci --ignore-scripts`
+- [x] ensure that we are asserting on the various structures that are in the integration suite's test examples in fixtures
+- [x] set up CI running static analysis and tests, using GitHub Actions (triggered by all branches)
+  - [x] use `npm ci --ignore-scripts`
+  - [ ] ensure everything is running correctly and passes on CI
+
 
 ## meta
 
