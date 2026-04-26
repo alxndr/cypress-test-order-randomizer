@@ -19,9 +19,6 @@ jobs:
             experimental: false
           - node-version: '24'
             experimental: false
-          # Nightly/pre-release: failures are visible but do not block the run.
-          - node-version: '26'
-            experimental: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
