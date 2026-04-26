@@ -86,9 +86,49 @@ export default defineConfig({
 
 - [x] `test/seeded-random.test.ts` — unit tests for PRNG and shuffle
 - [x] `test/block-randomizer.test.ts` — unit tests for AST block shuffling
-- [ ] `test/file-randomizer.test.ts` — integration tests using real temp files and globs
+- [ ] `test/file-randomizer.test.ts` — unit tests using real temp dirs and globs
 - [ ] `test/preprocessor.test.ts` — integration tests for the esbuild preprocessor
 - [ ] Ensure that the plugin is tested against a fresh installation of Cypress v15
+
+### integration test scenarios
+
+Scenarios to drive `test/preprocessor.test.ts` and any future e2e tests against a real Cypress project.
+
+#### file ordering
+- [ ] Multiple spec files run in a shuffled order (not the glob default)
+- [ ] Same seed → same file order reproduced across runs
+- [ ] `randomizeFiles: false` → files remain in original glob order
+- [ ] Single spec file → runs without error
+- [ ] No files match `specPattern` → graceful no-op
+
+#### block ordering
+- [ ] Multiple `it` blocks within a spec are reordered
+- [ ] Multiple top-level `describe` blocks at module scope are reordered
+- [ ] Nested `describe` scopes are each shuffled independently
+- [ ] Same seed → same block order reproduced across runs
+- [ ] `randomizeBlocks: false` → original declaration order preserved within each spec
+- [ ] Hooks (`beforeEach`, `afterEach`, `before`, `after`) remain at their original statement positions
+
+#### spec content compatibility
+- [ ] TypeScript specs (`.cy.ts`) parse and bundle correctly
+- [ ] JSX specs (`.cy.tsx`) parse and bundle correctly
+- [ ] Specs with relative imports (`../support/helpers`) resolve correctly after esbuild bundling
+- [ ] `describe.only`, `it.only`, `it.skip` are shuffled like their plain variants
+- [ ] Empty `describe` body does not crash
+- [ ] Spec with no test blocks passes through unchanged
+
+#### seed behaviour
+- [ ] String seed produces a reproducible run
+- [ ] Numeric seed produces a reproducible run
+- [ ] `42` (number) and `'42'` (string) produce the same shuffle (both stringify to `'42'`)
+- [ ] No seed provided → a random seed is auto-generated and printed to stdout
+- [ ] Auto-generated seed printed to stdout so a flaky run can be reproduced by re-using it
+
+#### configuration combinations
+- [ ] `{ randomizeFiles: true,  randomizeBlocks: true  }` — default; both shuffle
+- [ ] `{ randomizeFiles: false, randomizeBlocks: true  }` — only block order shuffled
+- [ ] `{ randomizeFiles: true,  randomizeBlocks: false }` — only file order shuffled
+- [ ] `{ randomizeFiles: false, randomizeBlocks: false }` — effective no-op / pass-through
 
 ### static analysis
 
