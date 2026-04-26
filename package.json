@@ -27,7 +27,8 @@
     "pretypecheck": "echo '\\nTypechecking...'",
     "typecheck": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
     "posttypecheck": "echo '\\nTypechecking succeeded!'",
-    "validate": "npm run lint && npm run typecheck && npm run test"
+    "validate": "npm run lint && npm run typecheck && npm run test",
+    "prepublishOnly": "npm run build && npm pack --dry-run"
   },
   "keywords": [
     "cypress",
