@@ -134,6 +134,11 @@ Potential scenarios to drive `test/preprocessor.test.ts` and any future e2e test
 - [x] add a linting setup (OXLint v1.61) with npm script (`"lint": "oxlint src/ test/"`)
 
 
+## developer experience
+
+- [ ] File watcher script (`scripts/dev.mjs`) using `node:fs watch()` with debounce — watches `src/` and `test/`, runs `lint && test` on change via `node:child_process`; add a `"dev"` npm script pointing to it (zero new dependencies)
+
+
 ## meta
 
 - [x] Choose and apply an open-source license (MIT, Apache-2.0, ISC, etc.), then remove `"private": true` and update `"license"` in `package.json`
