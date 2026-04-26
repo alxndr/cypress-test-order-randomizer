@@ -1,7 +1,7 @@
 import { defineConfig } from 'cypress'
 import { definePlugin } from '../../dist/index.js'
 
-// This fixture config is used by test/e2e.test.ts.
+// This fixture config is used by test/e2e.mjs.
 // It imports from dist/ (the built output) so the e2e suite validates the same
 // artefact that end-users install — not the raw TypeScript source.
 // All plugin options (seed, randomizeFiles, randomizeBlocks) are passed in via
