@@ -6,6 +6,7 @@
  * and validates that test execution order matches what the plugin promises.
  *
  * Each cypress run takes 30–60 s; the full suite runs five of them (~4 min).
+ * suite-d (.cy.tsx) is included in all five runs; no extra run is needed for it.
  *
  * Usage: node test/e2e.mjs   (or via `npm run test:e2e`)
  */
@@ -25,13 +26,17 @@ const cypressBin  = join(projectRoot, 'node_modules', '.bin', 'cypress')
 
 /**
  * Runs `cypress run` against the fixture project with the given --env string
- * and returns the passing test titles in execution order.
+ * and returns the passing and pending test titles in execution order.
  *
  * Uses --reporter json-stream, which emits one JSON array per Mocha event on
- * stdout. Passing tests produce lines like: ["pass",{"fullTitle":"suite-a A1"}]
+ * stdout. Tests produce lines like:
+ *   ["pass",{"fullTitle":"suite-a A1"}]
+ *   ["pending",{"fullTitle":"suite-d D3"}]
  * We filter for those lines rather than trying to parse a combined JSON report,
  * because Cypress 15 ignores --reporter-options output= and emits per-spec JSON
  * to stdout directly.
+ *
+ * Returns { passing, pending } — arrays of fullTitle strings.
  */
 function runCypress(envString) {
   const result = spawnSync(
@@ -44,26 +49,35 @@ function runCypress(envString) {
     throw new Error(`Failed to launch Cypress: ${result.error.message}`)
   }
 
-  const titles = []
+  const passing = []
+  const pending = []
   for (const line of result.stdout.split('\n')) {
-    if (!line.startsWith('["pass"')) continue
-    try {
-      const [, test] = JSON.parse(line)
-      titles.push(test.fullTitle)
-    } catch {
-      // Not a JSON line — skip Cypress's own terminal output
+    if (line.startsWith('["pass"')) {
+      try {
+        const [, test] = JSON.parse(line)
+        passing.push(test.fullTitle)
+      } catch {
+        // Not a JSON line — skip Cypress's own terminal output
+      }
+    } else if (line.startsWith('["pending"')) {
+      try {
+        const [, test] = JSON.parse(line)
+        pending.push(test.fullTitle)
+      } catch {
+        // Not a JSON line — skip
+      }
     }
   }
 
-  if (titles.length === 0) {
+  if (passing.length === 0 && pending.length === 0) {
     throw new Error(
-      `No passing tests found in Cypress output (exit ${result.status}).` +
+      `No passing or pending tests found in Cypress output (exit ${result.status}).` +
       `\nStdout (first 500 chars): ${result.stdout.slice(0, 500)}` +
       `\nStderr (first 500 chars): ${result.stderr.slice(0, 500)}`,
     )
   }
 
-  return titles
+  return { passing, pending }
 }
 
 // ---------------------------------------------------------------------------
@@ -85,7 +99,20 @@ for (const [index, { label, env }] of scenarios.entries()) {
   results.push(runCypress(env))
 }
 
-const [orderSeed42a, orderSeed42b, orderSeed43, orderNoBlocks, orderNoFiles] = results
+const [
+  resultSeed42a,
+  resultSeed42b,
+  resultSeed43,
+  resultNoBlocks,
+  resultNoFiles,
+] = results
+
+// Convenience aliases — existing assertions below operate on passing-title arrays
+const orderSeed42a  = resultSeed42a.passing
+const orderSeed42b  = resultSeed42b.passing
+const orderSeed43   = resultSeed43.passing
+const orderNoBlocks = resultNoBlocks.passing
+const orderNoFiles  = resultNoFiles.passing
 
 // ---------------------------------------------------------------------------
 // Assertions
@@ -184,6 +211,33 @@ check('randomizeBlocks=true: doubly-nested inner-2 nested 1 it-blocks are shuffl
   // All 3 present (3! = 6; ~17% chance seed=42 happens to preserve order — acceptable)
   assert.deepEqual([...names].toSorted(), ['C13', 'C14', 'C15'])
   assert.notDeepEqual(names, ['C13', 'C14', 'C15'])
+})
+
+// -- suite-d: TSX spec + it.skip / describe.skip -----------------------------
+// Uses resultSeed42a which includes both passing and pending arrays.
+
+check('suite-d (tsx): non-skipped it-blocks appear in passing results', () => {
+  assert.ok(resultSeed42a.passing.includes('suite-d D1'), 'D1 should pass')
+  assert.ok(resultSeed42a.passing.includes('suite-d D2'), 'D2 should pass')
+  assert.ok(resultSeed42a.passing.includes('suite-d D6'), 'D6 should pass')
+})
+
+check('suite-d (tsx): it.skip block does not appear in passing results', () => {
+  assert.ok(!resultSeed42a.passing.includes('suite-d D3'), 'D3 is skipped and must not pass')
+})
+
+check('suite-d (tsx): describe.skip children do not appear in passing results', () => {
+  assert.ok(!resultSeed42a.passing.includes('suite-d inner-d-skipped D4'), 'D4 is inside describe.skip')
+  assert.ok(!resultSeed42a.passing.includes('suite-d inner-d-skipped D5'), 'D5 is inside describe.skip')
+})
+
+check('suite-d (tsx): it.skip block is reported as pending', () => {
+  assert.ok(resultSeed42a.pending.includes('suite-d D3'), 'D3 must be reported pending')
+})
+
+check('suite-d (tsx): describe.skip children are reported as pending', () => {
+  assert.ok(resultSeed42a.pending.includes('suite-d inner-d-skipped D4'), 'D4 must be reported pending')
+  assert.ok(resultSeed42a.pending.includes('suite-d inner-d-skipped D5'), 'D5 must be reported pending')
 })
 
 // -- randomizeFiles=false ----------------------------------------------------

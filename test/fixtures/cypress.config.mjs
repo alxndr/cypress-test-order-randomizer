@@ -8,7 +8,7 @@ import { definePlugin } from '../../dist/index.js'
 // --env flags from the test runner so this config never needs to change.
 export default defineConfig({
   e2e: {
-    specPattern: 'e2e/**/*.cy.ts',
+    specPattern: 'e2e/**/*.cy.ts?(x)',
     supportFile: false,
     video: false,
     screenshotOnRunFailure: false,

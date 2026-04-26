@@ -14,8 +14,9 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "lint": "oxlint src/ test/",
-    "test": "vitest run",
+    "test": "npm run test:unit && npm run test:e2e",
     "test:e2e": "npm run build && node test/e2e.mjs",
+    "test:unit": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit"
   },
