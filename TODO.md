@@ -79,5 +79,5 @@ Let's aim to test-drive our code where possible.
 ## meta
 
 - [x] Choose and apply an open-source license (MIT, Apache-2.0, ISC, etc.), then remove `"private": true` and update `"license"` in `package.json`
-- [ ] Add `"files"` field to `package.json` before publishing
+- [x] Add `"files"` field to `package.json` before publishing
 - [x] TypeScript declarations auto-generated via `tsc` into `dist/` (see `tsconfig.build.json`)
