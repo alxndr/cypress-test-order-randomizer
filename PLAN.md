@@ -67,7 +67,7 @@ export default defineConfig({
 - [x] `src/block-randomizer.ts` — AST transform: shuffle `describe`/`it`/`test`/`context` blocks using `@babel/parser` + `@babel/generator`
 - [x] `src/file-randomizer.ts` — resolve `specPattern` globs with `fast-glob`, shuffle file list
 - [x] `src/preprocessor.ts` — esbuild-based `createPreprocessor` with AST esbuild plugin; handles watcher caching + `close`/`rerun` lifecycle
-- [ ] `src/index.ts` — `definePlugin(on, config, options)` entry point; re-exports `transformCode` for advanced use
+- [x] `src/index.ts` — `definePlugin(on, config, options)` entry point; re-exports `transformCode` for advanced use
 
 
 ## user-experience
