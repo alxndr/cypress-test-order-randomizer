@@ -46,7 +46,11 @@ function createMockConfig(overrides: Partial<MockConfig> = {}): MockConfig {
 
 describe('definePlugin', () => {
   let tempDir: string
-  let stdoutSpy: ReturnType<typeof vi.spyOn<typeof process.stdout, 'write'>>
+  // process.stdout.write is overloaded; vi.spyOn's key constraint excludes overloaded
+  // methods, so we use <any, any> to get a broadly-typed MockInstance that accepts
+  // the assignment and still supports .mockRestore() and toHaveBeenCalledWith().
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let stdoutSpy: ReturnType<typeof vi.spyOn<any, any>>
 
   beforeEach(async () => {
     tempDir = await mkdtemp(join(tmpdir(), 'cypress-test-order-randomizer-test'))
