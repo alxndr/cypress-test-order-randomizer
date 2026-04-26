@@ -17,9 +17,17 @@ function createMockConfig(overrides: Partial<MockConfig> = {}): MockConfig {
 
 describe('definePlugin', () => {
   let on: (event: string, handler: unknown) => void
+  let stdoutSpy: ReturnType<typeof vi.spyOn>
 
   beforeEach(() => {
     on = vi.fn<(event: string, handler: unknown) => void>()
+    // Suppress stdout for all tests to prevent seed lines from bleeding into
+    // concurrent test output from other files
+    stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true)
+  })
+
+  afterEach(() => {
+    stdoutSpy.mockRestore()
   })
 
   it('returns the config object', async () => {
@@ -42,13 +50,11 @@ describe('definePlugin', () => {
   })
 
   it('prints the seed to stdout', async () => {
-    const spy = vi.spyOn(process.stdout, 'write')
     const config = createMockConfig()
     await definePlugin(on, config, { seed: 'test-seed-123' })
-    expect(spy).toHaveBeenCalledWith(
+    expect(stdoutSpy).toHaveBeenCalledWith(
       expect.stringContaining('test-seed-123')
     )
-    spy.mockRestore()
   })
 
   it('uses a provided seed without throwing', async () => {
@@ -58,12 +64,10 @@ describe('definePlugin', () => {
   })
 
   it('generates a seed when none is provided', async () => {
-    const spy = vi.spyOn(process.stdout, 'write')
     const config = createMockConfig()
     await definePlugin(on, config)
     // Some seed should have been printed
-    expect(spy).toHaveBeenCalledWith(expect.stringMatching(/\[cypress-test-order-randomizer\] Seed:/))
-    spy.mockRestore()
+    expect(stdoutSpy).toHaveBeenCalledWith(expect.stringMatching(/\[cypress-test-order-randomizer\] Seed:/))
   })
 
   it('does not register a file:preprocessor when randomizeBlocks is false', async () => {
