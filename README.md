@@ -2,7 +2,16 @@
 
 Like it says on the tin. 🥫
 
-Cypress plugin that randomizes the execution order of your spec files and the `describe`/`it`/`test` blocks within them. Exposes ordering dependencies between tests; makes test suites more robust.
+This is a plugin for [Cypress](https://cypress.io) that randomizes the execution order of your test suite. It allows for spec files to be shuffled, and the `describe`/`it`/`test` blocks within them to be shuffled separately.
+
+Tested against Cypress v15 and NodeJS >= v22.
+
+
+### ...why??
+
+Predictably randomizing the order of your tests can expose unintentional execution-ordering dependencies between tests. Using a seed value for the ordering means that we can reliably recreate a given ordering once it's been generated.
+
+In sum, it contributes to making test suites more robust.
 
 
 ## Installation

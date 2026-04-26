@@ -1,23 +1,19 @@
-# Project Plan
+# TODOs
 
-The goal is to create a TypeScript/NodeJS tool which implements a plugin for Cypress (https://cypress.io).
-
-Our plugin will adjust the execution order of the test files that Cypress runs, as well as the `describe` and `it` blocks defined in them.
-
-Let's aim to test-drive our code where possible.
+There may also be `TODO` strings in the app/test code or comments; ideally they should be migrated into this file to avoid being ignored.
 
 
 ## versions
 
 - [ ] attempt upgrade to TypeScript v6
-- [ ] set up e.g. `dependabot` (so that when TS v7 comes out we can see how it runs on CI without any modifications)
 
 
 ## deploying
 
-- [ ] ...how do we deploy?
+- [ ] set up a GitHub Actions workflow with `workflow_dispatch` (manual trigger) that builds, runs tests, then publishes to npm using an `NPM_TOKEN` repository secret — enforces the full build+test+publish sequence without relying on the publisher's memory, while keeping the publish decision human-initiated rather than fully automatic
 
 
 ## CI
 
-- [ ] expand the CI test matrix to cover other supported Cypress major versions (currently only tests against the version pinned in devDependencies)
+- [ ] set up e.g. `dependabot` (so that when TS v7 comes out we can see how it runs on CI without any modifications)
+- [ ] support multiple major versions of Cypress?
