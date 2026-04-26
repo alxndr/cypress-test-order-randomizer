@@ -193,14 +193,14 @@ check('randomizeBlocks=false: nested inner-2 direct it-blocks appear in declarat
   const names = orderNoBlocks
     .filter(t => /^suite-c inner-2 C\d+$/.test(t))
     .map(t => t.slice('suite-c inner-2 '.length))
-  assert.deepEqual(names, ['C7', 'C8', 'C9', 'C10', 'C11', 'C12'])
+  assert.deepEqual(names, ['C7', 'C8', 'C9', 'C13', 'C14', 'C15'])
 })
 
 check('randomizeBlocks=false: doubly-nested inner-2 nested 1 it-blocks appear in declaration order', () => {
   const names = orderNoBlocks
     .filter(t => t.startsWith('suite-c inner-2 inner-2 nested 1 '))
     .map(t => t.slice('suite-c inner-2 inner-2 nested 1 '.length))
-  assert.deepEqual(names, ['C13', 'C14', 'C15'])
+  assert.deepEqual(names, ['C10', 'C11', 'C12'])
 })
 
 // -- randomizeBlocks=true (seed=42) ------------------------------------------
@@ -219,9 +219,9 @@ check('randomizeBlocks=true: nested inner-2 direct it-blocks are shuffled from d
   const names = orderSeed42a
     .filter(t => /^suite-c inner-2 C\d+$/.test(t))
     .map(t => t.slice('suite-c inner-2 '.length))
-  // All 6 direct it-blocks present (C10 < C11 < C12 < C7 < C8 < C9 alphabetically)
-  assert.deepEqual([...names].toSorted(), ['C10', 'C11', 'C12', 'C7', 'C8', 'C9'])
-  assert.notDeepEqual(names, ['C7', 'C8', 'C9', 'C10', 'C11', 'C12'])
+  // All 6 direct it-blocks present (C13 < C14 < C15 < C7 < C8 < C9 alphabetically)
+  assert.deepEqual([...names].toSorted(), ['C13', 'C14', 'C15', 'C7', 'C8', 'C9'])
+  assert.notDeepEqual(names, ['C7', 'C8', 'C9', 'C13', 'C14', 'C15'])
 })
 
 check('randomizeBlocks=true: doubly-nested inner-2 nested 1 it-blocks are shuffled from declaration order', () => {
@@ -229,30 +229,38 @@ check('randomizeBlocks=true: doubly-nested inner-2 nested 1 it-blocks are shuffl
     .filter(t => t.startsWith('suite-c inner-2 inner-2 nested 1 '))
     .map(t => t.slice('suite-c inner-2 inner-2 nested 1 '.length))
   // All 3 present (3! = 6; ~17% chance seed=42 happens to preserve order — acceptable)
-  assert.deepEqual([...names].toSorted(), ['C13', 'C14', 'C15'])
-  assert.notDeepEqual(names, ['C13', 'C14', 'C15'])
+  assert.deepEqual([...names].toSorted(), ['C10', 'C11', 'C12'])
+  assert.notDeepEqual(names, ['C10', 'C11', 'C12'])
 })
 
 // -- suite-d: TSX spec + it.skip / describe.skip -----------------------------
+// Uses resultNoBlocks (randomizeBlocks=false) for these checks: the suite-d
+// assertions are about TSX spec discovery and skip handling, not block
+// shuffling. With randomizeBlocks=false the source is not AST-transformed, so
+// every non-skipped test runs exactly as written.
 // json-stream has no pending event, so skipped tests are validated by absence
 // from both the passing and failing lists.
 
 check('suite-d (tsx): non-skipped it-blocks appear in passing results', () => {
-  assert.ok(resultSeed42a.passing.includes('suite-d D1'), 'D1 should pass')
-  assert.ok(resultSeed42a.passing.includes('suite-d D2'), 'D2 should pass')
-  assert.ok(resultSeed42a.passing.includes('suite-d D6'), 'D6 should pass')
+  assert.ok(resultNoBlocks.passing.includes('suite-d D1'), 'D1 should pass')
+  assert.ok(resultNoBlocks.passing.includes('suite-d D3'), 'D3 should pass')
+  assert.ok(resultNoBlocks.passing.includes('suite-d inner-d-running D6'), 'D6 (inner-d-running direct) should pass')
+  assert.ok(resultNoBlocks.passing.includes('suite-d inner-d-running inner-d-running nested D7'), 'D7 (inner-d-running nested) should pass')
+  assert.ok(resultNoBlocks.passing.includes('suite-d inner-d-running inner-d-running nested D8'), 'D8 (inner-d-running nested) should pass')
+  assert.ok(resultNoBlocks.passing.includes('suite-d inner-d-running D9'), 'D9 (inner-d-running direct) should pass')
+  assert.ok(resultNoBlocks.passing.includes('suite-d D10'), 'D10 should pass')
 })
 
 check('suite-d (tsx): skipped tests do not appear in passing results', () => {
-  assert.ok(!resultSeed42a.passing.includes('suite-d D3'), 'D3 (it.skip) must not pass')
-  assert.ok(!resultSeed42a.passing.includes('suite-d inner-d-skipped D4'), 'D4 (describe.skip) must not pass')
-  assert.ok(!resultSeed42a.passing.includes('suite-d inner-d-skipped D5'), 'D5 (describe.skip) must not pass')
+  assert.ok(!resultNoBlocks.passing.includes('suite-d D2'), 'D2 (it.skip) must not pass')
+  assert.ok(!resultNoBlocks.passing.includes('suite-d inner-d-skipped D4'), 'D4 (describe.skip) must not pass')
+  assert.ok(!resultNoBlocks.passing.includes('suite-d inner-d-skipped D5'), 'D5 (describe.skip) must not pass')
 })
 
 check('suite-d (tsx): skipped tests do not appear in failing results', () => {
-  assert.ok(!resultSeed42a.failing.includes('suite-d D3'), 'D3 (it.skip) must not fail')
-  assert.ok(!resultSeed42a.failing.includes('suite-d inner-d-skipped D4'), 'D4 (describe.skip) must not fail')
-  assert.ok(!resultSeed42a.failing.includes('suite-d inner-d-skipped D5'), 'D5 (describe.skip) must not fail')
+  assert.ok(!resultNoBlocks.failing.includes('suite-d D2'), 'D2 (it.skip) must not fail')
+  assert.ok(!resultNoBlocks.failing.includes('suite-d inner-d-skipped D4'), 'D4 (describe.skip) must not fail')
+  assert.ok(!resultNoBlocks.failing.includes('suite-d inner-d-skipped D5'), 'D5 (describe.skip) must not fail')
 })
 
 // -- randomizeFiles=false ----------------------------------------------------

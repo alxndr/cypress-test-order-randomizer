@@ -9,7 +9,11 @@ describe('suite-d', () => {
   })
   describe('inner-d-running', () => {
     it('D6', () => {})
-    it('D7', () => {})
+    describe('inner-d-running nested', () => {
+      it('D7', () => {})
+      it('D8', () => {})
+    })
+    it('D9', () => {})
   })
-  it('D8', () => {})
+  it('D10', () => {})
 })
