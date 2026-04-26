@@ -72,6 +72,8 @@ export default defineConfig({
 
 ## user-experience
 
+These options will be tested in the forthcoming integration tests...
+
 - [ ] `randomizeFiles` option (boolean, default `true`) — whether to shuffle spec file order
 - [ ] `randomizeBlocks` option (boolean, default `true`) — whether to shuffle `describe`/`it` blocks within files
 - [ ] `seed` option (string | number, optional) — fixed seed for reproducible runs; defaults to a random seed logged to stdout
