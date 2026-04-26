@@ -5,8 +5,10 @@
  * This will run real Cypress processes against the fixture project in fixtures/
  * and validates that test execution order matches what the plugin promises.
  *
- * Each cypress run takes 30–60 s; the full suite runs five of them (~4 min).
- * suite-d (.cy.tsx) is included in all five runs; no extra run is needed for it.
+ * Each cypress run takes 30–60 s; the full suite runs seven of them (~6 min).
+ * suite-d (.cy.tsx) is included in all runs; no extra run is needed for it.
+ * Two extra runs use alternate fixture configs to validate the programmatic
+ * options path and the --env-overrides-options priority rule.
  *
  * Usage: node test/e2e.mjs   (or via `npm run test:e2e`)
  */
@@ -25,23 +27,33 @@ const cypressBin  = join(projectRoot, 'node_modules', '.bin', 'cypress')
 // ---------------------------------------------------------------------------
 
 /**
- * Runs `cypress run` against the fixture project with the given --env string
- * and returns the passing and pending test titles in execution order.
+ * Runs `cypress run` against the fixture project and returns the passing and
+ * failing test titles in execution order.
+ *
+ * Options:
+ *   env        — value for --env (omit to pass no --env flag)
+ *   configFile — filename of an alternate config in test/fixtures/ (omit to use
+ *                the default cypress.config.mjs in that directory)
  *
  * Uses --reporter json-stream, which emits one JSON array per Mocha event on
- * stdout. Tests produce lines like:
- *   ["pass",{"fullTitle":"suite-a A1"}]
- *   ["pending",{"fullTitle":"suite-d D3"}]
+ * stdout. Passing tests produce lines like: ["pass",{"fullTitle":"suite-a A1"}]
  * We filter for those lines rather than trying to parse a combined JSON report,
  * because Cypress 15 ignores --reporter-options output= and emits per-spec JSON
  * to stdout directly.
  *
- * Returns { passing, pending } — arrays of fullTitle strings.
+ * Note: json-stream has no handler for the Mocha "pending" event, so skipped
+ * tests (it.skip / describe.skip) are validated by their absence from both the
+ * passing and failing lists.
+ *
+ * Returns { passing, failing } — arrays of fullTitle strings in execution order.
  */
-function runCypress(envString) {
+function runCypress({ env = undefined, configFile = undefined } = {}) {
+  const args = ['run', '--reporter', 'json-stream', '--project', fixturesDir]
+  if (configFile !== undefined) args.push('--config-file', configFile)
+  if (env !== undefined) args.push('--env', env)
   const result = spawnSync(
     cypressBin,
-    ['run', '--reporter', 'json-stream', '--project', fixturesDir, '--env', envString],
+    args,
     { encoding: 'utf-8', cwd: projectRoot, timeout: 120_000 },
   )
 
@@ -50,7 +62,7 @@ function runCypress(envString) {
   }
 
   const passing = []
-  const pending = []
+  const failing = []
   for (const line of result.stdout.split('\n')) {
     if (line.startsWith('["pass"')) {
       try {
@@ -59,29 +71,29 @@ function runCypress(envString) {
       } catch {
         // Not a JSON line — skip Cypress's own terminal output
       }
-    } else if (line.startsWith('["pending"')) {
+    } else if (line.startsWith('["fail"')) {
       try {
         const [, test] = JSON.parse(line)
-        pending.push(test.fullTitle)
+        failing.push(test.fullTitle)
       } catch {
         // Not a JSON line — skip
       }
     }
   }
 
-  if (passing.length === 0 && pending.length === 0) {
+  if (passing.length === 0) {
     throw new Error(
-      `No passing or pending tests found in Cypress output (exit ${result.status}).` +
+      `No passing tests found in Cypress output (exit ${result.status}).` +
       `\nStdout (first 500 chars): ${result.stdout.slice(0, 500)}` +
       `\nStderr (first 500 chars): ${result.stderr.slice(0, 500)}`,
     )
   }
 
-  return { passing, pending }
+  return { passing, failing }
 }
 
 // ---------------------------------------------------------------------------
-// Run the five Cypress scenarios up-front, then assert on their outputs.
+// Run all Cypress scenarios up-front, then assert on their outputs.
 // This keeps each scenario description tightly coupled to a single run.
 // ---------------------------------------------------------------------------
 
@@ -91,12 +103,18 @@ const scenarios = [
   { label: 'seed=43',                       env: 'seed=43' },
   { label: 'seed=42, randomizeBlocks=false', env: 'seed=42,randomizeBlocks=false' },
   { label: 'seed=42, randomizeFiles=false',  env: 'seed=42,randomizeFiles=false' },
+  // Config-path scenarios: options set programmatically, not via --env
+  { label: 'programmatic options (seed=42, randomizeBlocks=false)',
+    configFile: 'cypress.config.options-only.mjs' },
+  { label: 'env overrides programmatic options (randomizeBlocks false→true)',
+    env: 'randomizeBlocks=true,seed=42',
+    configFile: 'cypress.config.env-overrides-options.mjs' },
 ]
 
 const results = []
-for (const [index, { label, env }] of scenarios.entries()) {
+for (const [index, { label, env, configFile }] of scenarios.entries()) {
   console.log(`[${index + 1}/${scenarios.length}] Running Cypress: ${label}`)
-  results.push(runCypress(env))
+  results.push(runCypress({ env, configFile }))
 }
 
 const [
@@ -105,6 +123,8 @@ const [
   resultSeed43,
   resultNoBlocks,
   resultNoFiles,
+  resultOptionsOnly,
+  resultEnvOverridesOptions,
 ] = results
 
 // Convenience aliases — existing assertions below operate on passing-title arrays
@@ -214,7 +234,8 @@ check('randomizeBlocks=true: doubly-nested inner-2 nested 1 it-blocks are shuffl
 })
 
 // -- suite-d: TSX spec + it.skip / describe.skip -----------------------------
-// Uses resultSeed42a which includes both passing and pending arrays.
+// json-stream has no pending event, so skipped tests are validated by absence
+// from both the passing and failing lists.
 
 check('suite-d (tsx): non-skipped it-blocks appear in passing results', () => {
   assert.ok(resultSeed42a.passing.includes('suite-d D1'), 'D1 should pass')
@@ -222,22 +243,16 @@ check('suite-d (tsx): non-skipped it-blocks appear in passing results', () => {
   assert.ok(resultSeed42a.passing.includes('suite-d D6'), 'D6 should pass')
 })
 
-check('suite-d (tsx): it.skip block does not appear in passing results', () => {
-  assert.ok(!resultSeed42a.passing.includes('suite-d D3'), 'D3 is skipped and must not pass')
+check('suite-d (tsx): skipped tests do not appear in passing results', () => {
+  assert.ok(!resultSeed42a.passing.includes('suite-d D3'), 'D3 (it.skip) must not pass')
+  assert.ok(!resultSeed42a.passing.includes('suite-d inner-d-skipped D4'), 'D4 (describe.skip) must not pass')
+  assert.ok(!resultSeed42a.passing.includes('suite-d inner-d-skipped D5'), 'D5 (describe.skip) must not pass')
 })
 
-check('suite-d (tsx): describe.skip children do not appear in passing results', () => {
-  assert.ok(!resultSeed42a.passing.includes('suite-d inner-d-skipped D4'), 'D4 is inside describe.skip')
-  assert.ok(!resultSeed42a.passing.includes('suite-d inner-d-skipped D5'), 'D5 is inside describe.skip')
-})
-
-check('suite-d (tsx): it.skip block is reported as pending', () => {
-  assert.ok(resultSeed42a.pending.includes('suite-d D3'), 'D3 must be reported pending')
-})
-
-check('suite-d (tsx): describe.skip children are reported as pending', () => {
-  assert.ok(resultSeed42a.pending.includes('suite-d inner-d-skipped D4'), 'D4 must be reported pending')
-  assert.ok(resultSeed42a.pending.includes('suite-d inner-d-skipped D5'), 'D5 must be reported pending')
+check('suite-d (tsx): skipped tests do not appear in failing results', () => {
+  assert.ok(!resultSeed42a.failing.includes('suite-d D3'), 'D3 (it.skip) must not fail')
+  assert.ok(!resultSeed42a.failing.includes('suite-d inner-d-skipped D4'), 'D4 (describe.skip) must not fail')
+  assert.ok(!resultSeed42a.failing.includes('suite-d inner-d-skipped D5'), 'D5 (describe.skip) must not fail')
 })
 
 // -- randomizeFiles=false ----------------------------------------------------
@@ -254,6 +269,24 @@ check('randomizeFiles=false: all suite-b tests run before suite-c', () => {
   const firstC = orderNoFiles.findIndex(t => t.startsWith('suite-c '))
   assert.ok(lastB >= 0 && firstC >= 0, 'both suites must appear in results')
   assert.ok(lastB < firstC, `expected last suite-b (${lastB}) < first suite-c (${firstC})`)
+})
+
+// -- programmatic config options (no --env) ----------------------------------
+
+check('programmatic options: seed + randomizeBlocks=false produces same order as equivalent --env', () => {
+  // options-only config hardcodes seed=42 + randomizeBlocks=false, no --env passed.
+  // Must produce identical passing order to the --env seed=42,randomizeBlocks=false run.
+  assert.deepEqual(resultOptionsOnly.passing, orderNoBlocks)
+})
+
+// -- priority: --env overrides programmatic options --------------------------
+
+check('priority: --env randomizeBlocks=true overrides options.randomizeBlocks=false', () => {
+  // env-overrides config hardcodes randomizeBlocks=false in options,
+  // but --env randomizeBlocks=true,seed=42 takes priority.
+  // Effective config matches seed=42 default (randomizeBlocks=true), so the
+  // passing order must equal the first seed=42 run.
+  assert.deepEqual(resultEnvOverridesOptions.passing, orderSeed42a)
 })
 
 // ---------------------------------------------------------------------------
