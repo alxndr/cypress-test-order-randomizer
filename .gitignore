@@ -1,5 +1,8 @@
 ## macos detritus
 .DS_Store
 
+## build output
+dist/
+
 ## npm detritus
 node_modules/

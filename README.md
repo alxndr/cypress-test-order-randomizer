@@ -14,6 +14,8 @@ This plugin stands on the shoulders of giants:
 * [Cypress issue #2908: Allow for random spec ordering when running tests](https://github.com/cypress-io/cypress/issues/2908)
 
 <details>
+
+* [Cypress issue #390: Ability to run spec files in a specific order](https://github.com/cypress-io/cypress/issues/390)
 <summary>including a 2024 implementation by @AlexandreRozier (in turn based on @bahmutov's [@cypress/grep](https://github.com/cypress-io/cypress/blob/0e316966af3f281b3e297cae2d5f4c0c3054f8ed/npm/grep/src/plugin.js)):</summary>
 
 ```typescript
