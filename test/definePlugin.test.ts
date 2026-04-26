@@ -1,4 +1,4 @@
-// Integration tests for definePlugin — no real Cypress process is involved.
+// pseudo-integration tests for definePlugin — no real Cypress process is involved.
 //
 // What is simulated:
 //   - `on`          — a vi.fn() mock that captures event handlers Cypress would
@@ -44,12 +44,12 @@ function createMockConfig(overrides: Partial<MockConfig> = {}): MockConfig {
   }
 }
 
-describe('definePlugin — integration', () => {
+describe('definePlugin', () => {
   let tempDir: string
-  let stdoutSpy: ReturnType<typeof vi.spyOn>
+  let stdoutSpy: ReturnType<typeof vi.spyOn<typeof process.stdout, 'write'>>
 
   beforeEach(async () => {
-    tempDir = await mkdtemp(join(tmpdir(), 'ctr-integration-'))
+    tempDir = await mkdtemp(join(tmpdir(), 'cypress-test-order-randomizer-test'))
     stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true)
   })
 
