@@ -37,7 +37,7 @@
     "shuffle",
     "ast"
   ],
-  "private": true,
+  "files": ["dist", "README.md", "LICENSE"],
   "license": "MIT",
   "engines": {
     "node": ">=22.0.0",
