@@ -7,24 +7,38 @@ on:
 jobs:
 
   validate:
-    name: Lint, Typecheck & Unit Tests
+    name: Lint, Typecheck & Unit Tests (Node ${{ matrix.node-version }})
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.experimental }}
+    strategy:
+      matrix:
+        include:
+          # Stable: failures block the run.
+          # Add new versions as they reach LTS; drop them when they go EOL.
+          - node-version: '22'
+            experimental: false
+          - node-version: '24'
+            experimental: false
+          # Nightly/pre-release: failures are visible but do not block the run.
+          - node-version: '26'
+            experimental: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: ${{ matrix.node-version }}
+          check-latest: true
           cache: 'npm'
-      - run: npm ci --ignore-scripts
+      - run: npm ci --ignore-scripts # intentionally using --ignore-scripts to cut down on NPM vuln 'blast radius'
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run test:unit
 
-  # Slow job: builds dist/ then runs 7 Cypress processes (~6 min).
-  # Runs after `validate` so a lint/typecheck/unit failure cancels the run
-  # before spending 6 min on Cypress. To run both jobs in parallel instead
-  # (faster wall-clock time, similar billed minutes), remove the `needs` line.
   e2e:
+    # NOTE: this job runs a build and launches several Cypress processes, and
+    # so takes a longer time than the `validate` job. Therefore it is only
+    # launched once the `validate` job succeeds with the matrix of Node and
+    # Cypress versions.
     name: E2E Tests
     runs-on: ubuntu-latest
     needs: [validate]
