@@ -103,7 +103,13 @@ describe('createPreprocessor', () => {
   })
 
   it('same seed produces the same block order', async () => {
-    const specContent = `
+    // Both runs use the same filePath so the PRNG seed (${seed}:${filePath}) is
+    // identical, guaranteeing the same shuffle. Different outputPaths let us
+    // capture each run's result independently.
+    const specPath = join(tempDir, 'reproducible.cy.ts')
+    const out1 = join(tempDir, 'run1.cy.js')
+    const out2 = join(tempDir, 'run2.cy.js')
+    await writeFile(specPath, `
       describe('suite', () => {
         it('A', () => {})
         it('B', () => {})
@@ -111,20 +117,13 @@ describe('createPreprocessor', () => {
         it('D', () => {})
         it('E', () => {})
       })
-    `
-    const spec1 = join(tempDir, 'run1.cy.ts')
-    const spec2 = join(tempDir, 'run2.cy.ts')
-    const out1 = join(tempDir, 'run1.cy.js')
-    const out2 = join(tempDir, 'run2.cy.js')
-    await writeFile(spec1, specContent)
-    await writeFile(spec2, specContent)
+    `)
 
-    await createPreprocessor({ seed: 99, randomizeBlocks: true })(createMockFile(spec1, out1))
-    await createPreprocessor({ seed: 99, randomizeBlocks: true })(createMockFile(spec2, out2))
+    await createPreprocessor({ seed: 99, randomizeBlocks: true })(createMockFile(specPath, out1))
+    await createPreprocessor({ seed: 99, randomizeBlocks: true })(createMockFile(specPath, out2))
 
-    // Paths differ so compare content with paths normalized out
-    const output1 = (await readFile(out1, 'utf-8')).replaceAll(spec1, '<spec>')
-    const output2 = (await readFile(out2, 'utf-8')).replaceAll(spec2, '<spec>')
+    const output1 = await readFile(out1, 'utf-8')
+    const output2 = await readFile(out2, 'utf-8')
     expect(output1).toBe(output2)
   })
 
