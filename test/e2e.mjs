@@ -165,13 +165,21 @@ check('different seeds produce different execution orders', () => {
   assert.notDeepEqual(orderSeed42a, orderSeed43)
 })
 
+// suite-a has 10 it-blocks (1/10! ≈ 1-in-3.6M chance of identity permutation),
+// making it reliable for asserting that different seeds produce different block orders.
+check('different seeds produce different suite-a block orders (10 tests, P(collision)≈1/10!)', () => {
+  const namesSeed42 = orderSeed42a.filter(t => t.startsWith('suite-a ')).map(t => t.slice('suite-a '.length))
+  const namesSeed43 = orderSeed43.filter(t => t.startsWith('suite-a ')).map(t => t.slice('suite-a '.length))
+  assert.notDeepEqual(namesSeed42, namesSeed43)
+})
+
 // -- randomizeBlocks=false ---------------------------------------------------
 
 check('randomizeBlocks=false: suite-a it-blocks appear in declaration order', () => {
   const names = orderNoBlocks
     .filter(t => t.startsWith('suite-a '))
     .map(t => t.slice('suite-a '.length))
-  assert.deepEqual(names, ['A1', 'A2', 'A3', 'A4', 'A5', 'A6'])
+  assert.deepEqual(names, ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10'])
 })
 
 check('randomizeBlocks=false: suite-b it-blocks appear in declaration order', () => {

@@ -83,8 +83,8 @@ describe('randomizeSpecOrder', () => {
   })
 
   it('produces different orders for different seeds', () => {
-    // 8 items → 1/40320 chance of a false same-order result with any given pair of seeds
-    const files = ['/a.cy.ts', '/b.cy.ts', '/c.cy.ts', '/d.cy.ts', '/e.cy.ts', '/f.cy.ts', '/g.cy.ts', '/h.cy.ts']
+    // 13 items → 1/13! ≈ 1-in-6.2B chance of a false same-order result with any given pair of seeds
+    const files = ['/a.cy.ts', '/b.cy.ts', '/c.cy.ts', '/d.cy.ts', '/e.cy.ts', '/f.cy.ts', '/g.cy.ts', '/h.cy.ts', '/i.cy.ts', '/j.cy.ts', '/k.cy.ts', '/l.cy.ts', '/m.cy.ts']
     const result1 = randomizeSpecOrder(files, createPrng(1))
     const result2 = randomizeSpecOrder(files, createPrng(2))
     expect(result1).not.toEqual(result2)
