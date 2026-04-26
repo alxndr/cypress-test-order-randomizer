@@ -1,0 +1,5 @@
+## macos detritus
+.DS_Store
+
+## npm detritus
+node_modules/
