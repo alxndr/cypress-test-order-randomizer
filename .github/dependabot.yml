@@ -1,0 +1,30 @@
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 5
+      semver-major-days: 14
+    groups:
+      # Batch all non-Cypress dependency updates into one PR to reduce noise.
+      # Cypress is kept separate because major-version bumps need manual testing.
+      dependencies:
+        exclude-patterns:
+          - cypress
+      cypress:
+        patterns:
+          - cypress
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 5
+    groups:
+      actions:
+        patterns:
+          - "*"
