@@ -37,6 +37,26 @@ type CypressPluginOn = (event: string, handler: unknown) => void
 interface CypressPluginConfig {
   specPattern?: string | string[]
   projectRoot?: string
+  // Populated by --env flags on the CLI and the env: block in cypress.config.ts.
+  // We read plugin options from here so users can override without editing config.
+  env?: Record<string, unknown>
+}
+
+// Returns the boolean value of a key in config.env, with coercion from the
+// string 'false' that --env flags always produce. Returns undefined when absent.
+function readBoolEnv(env: Record<string, unknown> | undefined, key: string): boolean | undefined {
+  const value = env?.[key]
+  if (value === undefined || value === null) return undefined
+  if (typeof value === 'boolean') return value
+  return String(value) !== 'false'
+}
+
+// Returns a non-empty string value from config.env, or undefined when absent.
+function readStringEnv(env: Record<string, unknown> | undefined, key: string): string | undefined {
+  const value = env?.[key]
+  if (value === undefined || value === null) return undefined
+  const str = String(value)
+  return str.length > 0 ? str : undefined
 }
 
 /**
@@ -50,22 +70,29 @@ interface CypressPluginConfig {
  *   return definePlugin(on, config)
  * }
  * ```
+ *
+ * All three options can also be set or overridden at run time via Cypress's
+ * `--env` flag (highest priority), which takes precedence over the `options`
+ * argument (project-level defaults):
+ *
+ * ```
+ * npx cypress run --env seed=42,randomizeBlocks=false
+ * ```
  */
 export async function definePlugin(
   on: CypressPluginOn,
   config: CypressPluginConfig,
   options: PluginOptions = {}
 ): Promise<CypressPluginConfig> {
-  const {
-    randomizeFiles = true,
-    randomizeBlocks = true,
-    seed: providedSeed,
-  } = options
+  const env = config.env
 
-  // Resolve or generate the seed and announce it so failed runs can be reproduced
-  const seed = providedSeed !== undefined
-    ? String(providedSeed)
-    : randomBytes(6).toString('hex')
+  // Priority: config.env (--env flags, always wins) > options (project default) > built-in defaults
+  const randomizeFiles = readBoolEnv(env, 'randomizeFiles') ?? options.randomizeFiles ?? true
+  const randomizeBlocks = readBoolEnv(env, 'randomizeBlocks') ?? options.randomizeBlocks ?? true
+  const seed =
+    readStringEnv(env, 'seed') ??
+    (options.seed !== undefined ? String(options.seed) : undefined) ??
+    randomBytes(6).toString('hex')
 
   process.stdout.write(`[cypress-test-order-randomizer] Seed: ${seed}\n`)
 

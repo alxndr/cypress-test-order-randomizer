@@ -78,6 +78,33 @@ These options will be tested in the forthcoming integration tests...
 - [ ] `randomizeBlocks` option (boolean, default `true`) — whether to shuffle `describe`/`it` blocks within files
 - [ ] `seed` option (string | number, optional) — fixed seed for reproducible runs; defaults to a random seed logged to stdout
 
+### Cypress `--env` passthrough
+
+Users should be able to override plugin options from the command line without changing `cypress.config.ts`:
+
+```
+npx cypress run --env seed=42
+npx cypress run --env seed=42,randomizeBlocks=false
+```
+
+**Implemented.** The correct priority order is:
+
+1. `config.env.seed` / `config.env.randomizeFiles` / `config.env.randomizeBlocks` — CLI `--env` flag or `env:` block in `cypress.config.ts`; wins over everything so CI and one-off runs can always override
+2. `options.seed` / `options.randomizeFiles` / `options.randomizeBlocks` — programmatic defaults set in `setupNodeEvents`; version-controlled project defaults
+3. Built-in defaults (`randomizeFiles: true`, `randomizeBlocks: true`, random seed)
+
+The `CypressPluginConfig` interface needs `env?: Record<string, unknown>` added, and string-to-boolean coercion is needed for `randomizeFiles`/`randomizeBlocks` (all `--env` values arrive as strings).
+
+**The `options` object is fully optional** — once `--env` passthrough is in place, `definePlugin(on, config)` (no third argument) is a valid and complete configuration for users who want to control everything from the CLI.
+
+**The registration line itself is irreducible.** Cypress v15 requires explicit `setupNodeEvents` wiring; there is no auto-registration path. The minimum viable `cypress.config.ts` touchpoint is:
+
+```typescript
+setupNodeEvents(on, config) {
+  return definePlugin(on, config)
+}
+```
+
 
 ## tests
 
@@ -85,48 +112,65 @@ These options will be tested in the forthcoming integration tests...
 - [x] `test/block-randomizer.test.ts` — unit tests for AST block shuffling
 - [x] `test/file-randomizer.test.ts` — unit tests using real temp dirs and globs
 - [x] `test/preprocessor.test.ts` — integration tests for the esbuild preprocessor
-- [ ] Ensure that the plugin is tested against a fresh installation of Cypress v15
-  - see below for potential integration test scripts
+- [x] Ensure that the plugin is tested against a real Cypress v15 run — `scripts/e2e.mjs` + `npm run test:e2e`
 
 ### integration test scenarios
 
-Potential scenarios to drive `test/preprocessor.test.ts` and any future e2e tests against a 'real' (JIT-created) Cypress project.
+Covered by `test/definePlugin.test.ts` (unit-level, fast) and `scripts/e2e.mjs` (real Cypress process, slow).
 
 #### file ordering
-- [ ] Multiple spec files run in a shuffled order (not the glob default)
-- [ ] Same seed → same file order reproduced across runs
-- [ ] `randomizeFiles: false` → files remain in original glob order
-- [ ] Single spec file → runs without error
-- [ ] No files match `specPattern` → graceful no-op
+- [x] Multiple spec files run in a shuffled order (not the glob default)
+- [x] Same seed → same file order reproduced across runs
+- [x] `randomizeFiles: false` → files remain in original glob order
+- [x] Single spec file → runs without error
+- [x] No files match `specPattern` → graceful no-op
 
 #### block ordering
-- [ ] Multiple `it` blocks within a spec are reordered
-- [ ] Multiple top-level `describe` blocks at module scope are reordered
-- [ ] Nested `describe` scopes are each shuffled independently
-- [ ] Same seed → same block order reproduced across runs
-- [ ] `randomizeBlocks: false` → original declaration order preserved within each spec
-- [ ] Hooks (`beforeEach`, `afterEach`, `before`, `after`) remain at their original statement positions
+- [x] Multiple `it` blocks within a spec are reordered
+- [x] Multiple top-level `describe` blocks at module scope are reordered
+- [x] Nested `describe` scopes are each shuffled independently
+- [x] Same seed → same block order reproduced across runs
+- [x] `randomizeBlocks: false` → original declaration order preserved within each spec
+- [x] Hooks (`beforeEach`, `afterEach`, `before`, `after`) remain at their original statement positions
 
 #### spec content compatibility
-- [ ] TypeScript specs (`.cy.ts`) parse and bundle correctly
-- [ ] JSX specs (`.cy.tsx`) parse and bundle correctly
-- [ ] Specs with relative imports (`../support/helpers`) resolve correctly after esbuild bundling
-- [ ] `describe.only`, `it.only`, `it.skip` are shuffled like their plain variants
-- [ ] Empty `describe` body does not crash
-- [ ] Spec with no test blocks passes through unchanged
+- [x] TypeScript specs (`.cy.ts`) parse and bundle correctly
+- [x] JSX specs (`.cy.tsx`) parse and bundle correctly
+- [x] Specs with relative imports (`../support/helpers`) resolve correctly after esbuild bundling
+- [x] `describe.only`, `it.only`, `it.skip` are shuffled like their plain variants
+- [x] Empty `describe` body does not crash
+- [x] Spec with no test blocks passes through unchanged
 
 #### seed behaviour
-- [ ] String seed produces a reproducible run
-- [ ] Numeric seed produces a reproducible run
-- [ ] `42` (number) and `'42'` (string) produce the same shuffle (both stringify to `'42'`)
-- [ ] No seed provided → a random seed is auto-generated and printed to stdout
-- [ ] Auto-generated seed printed to stdout so a flaky run can be reproduced by re-using it
+- [x] String seed produces a reproducible run
+- [x] Numeric seed produces a reproducible run
+- [x] `42` (number) and `'42'` (string) produce the same shuffle (both stringify to `'42'`)
+- [x] No seed provided → a random seed is auto-generated and printed to stdout
+- [x] Auto-generated seed printed to stdout so a flaky run can be reproduced by re-using it
 
 #### configuration combinations
-- [ ] `{ randomizeFiles: true,  randomizeBlocks: true  }` — default; both shuffle
-- [ ] `{ randomizeFiles: false, randomizeBlocks: true  }` — only block order shuffled
-- [ ] `{ randomizeFiles: true,  randomizeBlocks: false }` — only file order shuffled
-- [ ] `{ randomizeFiles: false, randomizeBlocks: false }` — effective no-op / pass-through
+- [x] `{ randomizeFiles: true,  randomizeBlocks: true  }` — default; both shuffle
+- [x] `{ randomizeFiles: false, randomizeBlocks: true  }` — only block order shuffled
+- [x] `{ randomizeFiles: true,  randomizeBlocks: false }` — only file order shuffled
+- [x] `{ randomizeFiles: false, randomizeBlocks: false }` — effective no-op / pass-through
+
+### end-to-end (`test:e2e`) — real Cypress run against a fixture project ✓
+
+**Implemented.** `npm run build && node scripts/e2e.mjs`
+
+Fixture layout:
+```
+fixtures/
+  cypress.config.mjs     ← imports definePlugin from ../../dist/index.js; no options
+  e2e/
+    suite-a.cy.ts        ← 6 it-blocks (A1–A6)
+    suite-b.cy.ts        ← 6 it-blocks (B1–B6)
+    suite-c.cy.ts        ← nested: inner-1 (C1–C6) + inner-2 (C7–C12)
+```
+
+Uses `--reporter json-stream` (Cypress 15 ignores `--reporter-options output=`; json-stream emits one JSON line per event so `["pass",{...}]` lines can be filtered from stdout without any file I/O).
+
+10 checks across 5 Cypress runs; all pass.
 
 ### static analysis
 
