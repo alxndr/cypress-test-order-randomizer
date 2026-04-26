@@ -57,7 +57,7 @@ describe('shuffleArray', () => {
   it('contains all the same elements as the input', () => {
     const input = ['a', 'b', 'c', 'd', 'e']
     const result = shuffleArray(input, createPrng(42))
-    expect([...result].sort()).toEqual([...input].sort())
+    expect([...result].toSorted()).toEqual([...input].toSorted())
   })
 
   it('does not mutate the original array', () => {

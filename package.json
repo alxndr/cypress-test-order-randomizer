@@ -13,11 +13,19 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
+    "lint": "oxlint src/ test/",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"
   },
-  "keywords": ["cypress", "plugin", "randomize", "test-order", "shuffle", "ast"],
+  "keywords": [
+    "cypress",
+    "plugin",
+    "randomize",
+    "test-order",
+    "shuffle",
+    "ast"
+  ],
   "private": true,
   "license": "UNLICENSED",
   "engines": {
@@ -40,6 +48,7 @@
   "devDependencies": {
     "@types/node": "^22.0.0",
     "esbuild": "^0.23.0",
+    "oxlint": "^1.61.0",
     "typescript": "^5.0.0",
     "vitest": "^2.0.0"
   }

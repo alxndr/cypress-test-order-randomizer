@@ -8,12 +8,6 @@ function extractTestNames(code: string): string[] {
     .map(match => match[1]!)
 }
 
-/** Extracts top-level describe/context names in source order */
-function extractDescribeNames(code: string): string[] {
-  return [...code.matchAll(/\b(?:describe|context)(?:\.only|\.skip)?\s*\(\s*['"`]([^'"`\n]+)['"`]/g)]
-    .map(match => match[1]!)
-}
-
 describe('transformCode', () => {
   it('returns a string', () => {
     expect(typeof transformCode(`it('test', () => {})`, createPrng(1))).toBe('string')
@@ -79,7 +73,7 @@ describe('transformCode', () => {
     const result = transformCode(code, createPrng(1))
     const outputOrder = extractTestNames(result)
     expect(outputOrder).not.toEqual(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'])
-    expect([...outputOrder].sort()).toEqual(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'])
+    expect([...outputOrder].toSorted()).toEqual(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'])
   })
 
   it('preserves non-test statements (hooks, variables, imports)', () => {
@@ -138,7 +132,7 @@ describe('transformCode', () => {
     const inputOrder = ['nested A', 'nested B', 'nested C', 'nested D', 'nested E', 'nested F', 'nested G', 'nested H']
     const result = transformCode(code, createPrng(1))
     const outputOrder = extractTestNames(result)
-    expect([...outputOrder].sort()).toEqual([...inputOrder].sort())
+    expect([...outputOrder].toSorted()).toEqual([...inputOrder].toSorted())
     expect(outputOrder).not.toEqual(inputOrder)
   })
 

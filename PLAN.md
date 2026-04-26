@@ -133,7 +133,7 @@ Scenarios to drive `test/preprocessor.test.ts` and any future e2e tests against 
 ### static analysis
 
 - [x] add a npm script for type-checking the codebase (`"typecheck": "tsc --noEmit"`)
-- [ ] add a linting setup (OXLint?) with npm script
+- [x] add a linting setup (OXLint v1.61) with npm script (`"lint": "oxlint src/ test/"`)
 
 
 ## meta
