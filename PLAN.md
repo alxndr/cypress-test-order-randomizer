@@ -69,7 +69,7 @@ export default defineConfig({
 ## core
 
 - [x] `src/seeded-random.ts` — counter-mode SHA-256 PRNG (via `node:crypto`) + Fisher-Yates shuffle; accepts `string | number` seed
-- [ ] `src/block-randomizer.ts` — AST transform: shuffle `describe`/`it`/`test`/`context` blocks using `@babel/parser` + `@babel/generator`
+- [x] `src/block-randomizer.ts` — AST transform: shuffle `describe`/`it`/`test`/`context` blocks using `@babel/parser` + `@babel/generator`
 - [ ] `src/file-randomizer.ts` — resolve `specPattern` globs with `fast-glob`, shuffle file list
 - [ ] `src/preprocessor.ts` — esbuild-based `createPreprocessor` with AST esbuild plugin; handles watcher caching + `close`/`rerun` lifecycle
 - [ ] `src/index.ts` — `definePlugin(on, config, options)` entry point; re-exports `transformCode` for advanced use
@@ -85,7 +85,7 @@ export default defineConfig({
 ## tests
 
 - [x] `test/seeded-random.test.ts` — unit tests for PRNG and shuffle
-- [ ] `test/block-randomizer.test.ts` — unit tests for AST block shuffling
+- [x] `test/block-randomizer.test.ts` — unit tests for AST block shuffling
 - [ ] `test/file-randomizer.test.ts` — integration tests using real temp files and globs
 - [ ] `test/preprocessor.test.ts` — integration tests for the esbuild preprocessor
 - [ ] Ensure that the plugin is tested against a fresh installation of Cypress v15
