@@ -14,9 +14,9 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "lint": "oxlint src/ test/",
-    "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [
     "cypress",
@@ -29,7 +29,8 @@
   "private": true,
   "license": "UNLICENSED",
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=22.0.0",
+    "npm": ">=11.10.0"
   },
   "peerDependencies": {
     "cypress": ">=15.0.0",
