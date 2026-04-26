@@ -9,11 +9,6 @@ Let's aim to test-drive our code where possible.
 
 ## TypeScript setup
 
-- [x] Add `typescript` (`^5.0.0`) and `@types/node` (`^22.0.0`) to devDependencies
-- [x] Create `tsconfig.json` — type-checking config, includes `src` and `test`, `noEmit: true`
-- [x] Create `tsconfig.build.json` — extends `tsconfig.json`, compiles `src` → `dist`, emits declarations + source maps
-- [x] Add `"type": "module"`, update `"main"` / `"types"` / `"exports"`, add `"build"` and `"typecheck"` scripts to `package.json`
-- [x] Update `.gitignore` to include `dist/` and `node_modules/`
 - [ ] Migrate to TypeScript v6 when it is released and stable
 
 
@@ -71,7 +66,7 @@ export default defineConfig({
 - [x] `src/seeded-random.ts` — counter-mode SHA-256 PRNG (via `node:crypto`) + Fisher-Yates shuffle; accepts `string | number` seed
 - [x] `src/block-randomizer.ts` — AST transform: shuffle `describe`/`it`/`test`/`context` blocks using `@babel/parser` + `@babel/generator`
 - [x] `src/file-randomizer.ts` — resolve `specPattern` globs with `fast-glob`, shuffle file list
-- [ ] `src/preprocessor.ts` — esbuild-based `createPreprocessor` with AST esbuild plugin; handles watcher caching + `close`/`rerun` lifecycle
+- [x] `src/preprocessor.ts` — esbuild-based `createPreprocessor` with AST esbuild plugin; handles watcher caching + `close`/`rerun` lifecycle
 - [ ] `src/index.ts` — `definePlugin(on, config, options)` entry point; re-exports `transformCode` for advanced use
 
 
@@ -87,12 +82,13 @@ export default defineConfig({
 - [x] `test/seeded-random.test.ts` — unit tests for PRNG and shuffle
 - [x] `test/block-randomizer.test.ts` — unit tests for AST block shuffling
 - [x] `test/file-randomizer.test.ts` — unit tests using real temp dirs and globs
-- [ ] `test/preprocessor.test.ts` — integration tests for the esbuild preprocessor
+- [x] `test/preprocessor.test.ts` — integration tests for the esbuild preprocessor
 - [ ] Ensure that the plugin is tested against a fresh installation of Cypress v15
+  - see below for potential integration test scripts
 
 ### integration test scenarios
 
-Scenarios to drive `test/preprocessor.test.ts` and any future e2e tests against a real Cypress project.
+Potential scenarios to drive `test/preprocessor.test.ts` and any future e2e tests against a 'real' (JIT-created) Cypress project.
 
 #### file ordering
 - [ ] Multiple spec files run in a shuffled order (not the glob default)
