@@ -177,4 +177,58 @@ describe('createPreprocessor', () => {
     expect(output).toContain('typed suite')
     expect(output).toContain('typed test')
   })
+
+  it('handles a JSX spec (.cy.tsx)', async () => {
+    const specPath = join(tempDir, 'component.cy.tsx')
+    const outputPath = join(tempDir, 'component.cy.js')
+    // esbuild transforms JSX to React.createElement by default; React doesn't need
+    // to be installed for the build to succeed — it's treated as a global reference
+    await writeFile(specPath, `
+      describe('jsx suite', () => {
+        it('renders an element', () => {
+          const el = <div className="test" />
+        })
+      })
+    `)
+
+    const handler = createPreprocessor({ seed: 42, randomizeBlocks: true })
+    await expect(handler(createMockFile(specPath, outputPath))).resolves.toBe(outputPath)
+
+    const output = await readFile(outputPath, 'utf-8')
+    expect(output).toContain('jsx suite')
+    expect(output).toContain('renders an element')
+  })
+
+  it('resolves relative imports and inlines them into the bundle', async () => {
+    const helperPath = join(tempDir, 'helpers.ts')
+    const specPath = join(tempDir, 'uses-helpers.cy.ts')
+    const outputPath = join(tempDir, 'uses-helpers.cy.js')
+
+    await writeFile(helperPath, `export const MARKER = 'helper-was-bundled'`)
+    await writeFile(specPath, `
+      import { MARKER } from './helpers'
+      describe('imports suite', () => {
+        it('uses the helper', () => { console.log(MARKER) })
+      })
+    `)
+
+    const handler = createPreprocessor({ seed: 42, randomizeBlocks: true })
+    await expect(handler(createMockFile(specPath, outputPath))).resolves.toBe(outputPath)
+
+    const output = await readFile(outputPath, 'utf-8')
+    expect(output).toContain('helper-was-bundled')
+    expect(output).toContain('imports suite')
+  })
+
+  it('handles an empty describe body without crashing', async () => {
+    const specPath = join(tempDir, 'empty-describe.cy.ts')
+    const outputPath = join(tempDir, 'empty-describe.cy.js')
+    await writeFile(specPath, `describe('empty suite', () => {})`)
+
+    const handler = createPreprocessor({ seed: 42, randomizeBlocks: true })
+    await expect(handler(createMockFile(specPath, outputPath))).resolves.toBe(outputPath)
+
+    const output = await readFile(outputPath, 'utf-8')
+    expect(output).toContain('empty suite')
+  })
 })

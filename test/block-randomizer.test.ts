@@ -180,4 +180,28 @@ describe('transformCode', () => {
     expect(names).toContain('B')
     expect(names).toContain('C')
   })
+
+  it('reorders multiple top-level describe blocks', () => {
+    // 6 top-level describes → 1/720 chance of preserving order with any given seed
+    const code = `
+      describe('suite A', () => { it('A1', () => {}) })
+      describe('suite B', () => { it('B1', () => {}) })
+      describe('suite C', () => { it('C1', () => {}) })
+      describe('suite D', () => { it('D1', () => {}) })
+      describe('suite E', () => { it('E1', () => {}) })
+      describe('suite F', () => { it('F1', () => {}) })
+    `
+    const inputOrder = ['suite A', 'suite B', 'suite C', 'suite D', 'suite E', 'suite F']
+    const result = transformCode(code, createPrng(1))
+    const outputOrder = [...result.matchAll(/describe\(['"`](suite [A-F])['"`]/g)].map(m => m[1]!)
+    expect([...outputOrder].toSorted()).toEqual([...inputOrder].toSorted())
+    expect(outputOrder).not.toEqual(inputOrder)
+  })
+
+  it('handles an empty describe body without crashing', () => {
+    const code = `describe('empty suite', () => {})`
+    expect(() => transformCode(code, createPrng(42))).not.toThrow()
+    const result = transformCode(code, createPrng(42))
+    expect(result).toContain('empty suite')
+  })
 })
