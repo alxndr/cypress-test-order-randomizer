@@ -30,9 +30,8 @@ export interface PluginOptions {
 
 // Minimal Cypress plugin API shapes — we avoid importing from `cypress` itself
 // so the peer dependency stays optional at TypeScript-compilation time.
-// These are structurally compatible with Cypress.PluginEvents and
-// Cypress.PluginConfigOptions respectively.
-type CypressPluginOn = (event: string, handler: unknown) => void
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type CypressPluginOn = (event: any, handler: any) => void
 
 interface CypressPluginConfig {
   specPattern?: string | string[]
@@ -79,11 +78,11 @@ function readStringEnv(env: Record<string, unknown> | undefined, key: string): s
  * npx cypress run --env seed=42,randomizeBlocks=false
  * ```
  */
-export async function definePlugin(
+export async function definePlugin<T extends CypressPluginConfig>(
   on: CypressPluginOn,
-  config: CypressPluginConfig,
+  config: T,
   options: PluginOptions = {}
-): Promise<CypressPluginConfig> {
+): Promise<T> {
   const env = config.env
 
   // Priority: config.env (--env flags, always wins) > options (project default) > built-in defaults

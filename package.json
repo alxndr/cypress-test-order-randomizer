@@ -1,18 +1,19 @@
 {
   "name": "cypress-test-order-randomizer",
-  "version": "0.1.0-alpha",
+  "version": "0.1.0-alpha.1",
   "description": "WIP — Cypress v15 plugin that randomizes the order in which tests are run (in a reproducible way, and using AST manipulation)",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/cjs/index.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/index.js",
+      "require": "./dist/cjs/index.js",
       "types": "./dist/index.d.ts"
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json && tsc -p tsconfig.build.cjs.json && node --input-type=commonjs -e 'require(`node:fs`).writeFileSync(`dist/cjs/package.json`, JSON.stringify({type:`commonjs`}))'",
     "postbuild": "echo '\\nBuild succeeded!'",
     "prelint": "echo '\\nLinting...'",
     "lint": "oxlint src/ test/",

@@ -5,7 +5,7 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     sequence: {
-      shuffle: true, // shuffle both test files and tests within each file
+      shuffle: true, // Vitest shuffle — both test files and tests within each file (e.g. what we are porting to Cypress with this plugin)
     },
   },
 })

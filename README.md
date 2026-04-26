@@ -147,9 +147,11 @@ Useful for temporarily debugging an ordering issue without touching
    on Node.js's built-in `crypto` module. No hand-rolled math.
 
 
-## inspiration
+## inspiration / prior art
 
 This plugin stands on the shoulders of giants:
+
+* the Vitest [`sequence.shuffle` and `sequence.seed` options](https://vitest.dev/config/sequence)
 
 * [Bojan Dimitrovski, "Running Cypress Tests in Random Order"](https://prezi.com/p/xpa-hgs-fbyi/running-cypress-tests-in-random-order/)
 
