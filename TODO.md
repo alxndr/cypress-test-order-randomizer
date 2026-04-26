@@ -70,20 +70,15 @@ export default defineConfig({
   * comment in e2e test suite says "3! = 6; ~17% chance seed=42 happens to preserve order — acceptable" ... but can we make it more likely that the seed value produces a unique run order? perhaps seeds need to be longer to provide that guarantee?
 
 
-## user-experience
-
-These options will be tested in the forthcoming integration tests...
-
-- [ ] verify that the three configuration options (`randomizeFiles`, `randomizeBlocks`, `seed`) can be set via calling the `defineConfig` function or via passing env vars
-    - [ ] verify that values passed with env vars supercede the configuration set via the `defineConfig` function
-
-
 ## tests
 
 - [x] ensure that we are asserting on the various structures that are in the integration suite's test examples in fixtures
+- [ ] verify that the three configuration options (`randomizeFiles`, `randomizeBlocks`, `seed`) can be set via calling the `defineConfig` function or via passing env vars
+    - [ ] verify that values passed with env vars supercede the configuration set via the `defineConfig` function
 - [x] set up CI running static analysis and tests, using GitHub Actions (triggered by all branches)
   - [x] use `npm ci --ignore-scripts`
   - [ ] ensure everything is running correctly and passes on CI
+- [x] ensure everything works in a separate app's Cypress suite 🎉
 
 
 ## meta
