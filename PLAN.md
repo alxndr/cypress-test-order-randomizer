@@ -136,6 +136,6 @@ Potential scenarios to drive `test/preprocessor.test.ts` and any future e2e test
 
 ## meta
 
-- [ ] Choose and apply an open-source license (MIT, Apache-2.0, ISC, etc.), then remove `"private": true` and update `"license"` in `package.json`
+- [x] Choose and apply an open-source license (MIT, Apache-2.0, ISC, etc.), then remove `"private": true` and update `"license"` in `package.json`
 - [ ] Add `"files"` field to `package.json` before publishing
 - [ ] TypeScript declarations auto-generated via `tsc` into `dist/` (see `tsconfig.build.json`)

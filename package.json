@@ -1,7 +1,7 @@
 {
   "name": "cypress-test-order-randomizer",
   "version": "0.1.0-alpha",
-  "description": "Cypress plugin that randomizes test file and block execution order using AST manipulation",
+  "description": "WIP — Cypress v15 plugin that randomizes the order in which tests are run (in a reproducible way, and using AST manipulation)",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -27,7 +27,7 @@
     "ast"
   ],
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "engines": {
     "node": ">=22.0.0",
     "npm": ">=11.10.0"
