@@ -72,11 +72,11 @@ export default defineConfig({
 
 ## user-experience
 
-These options are implemented and validated end-to-end in `test/e2e.mjs`.
+These options will be tested in the forthcoming integration tests...
 
-- [x] `randomizeFiles` option (boolean, default `true`) — whether to shuffle spec file order
-- [x] `randomizeBlocks` option (boolean, default `true`) — whether to shuffle `describe`/`it` blocks within files
-- [x] `seed` option (string | number, optional) — fixed seed for reproducible runs; defaults to a random seed logged to stdout
+- [ ] `randomizeFiles` option (boolean, default `true`) — whether to shuffle spec file order
+- [ ] `randomizeBlocks` option (boolean, default `true`) — whether to shuffle `describe`/`it` blocks within files
+- [ ] `seed` option (string | number, optional) — fixed seed for reproducible runs; defaults to a random seed logged to stdout
 
 ### Cypress `--env` passthrough
 
@@ -108,7 +108,7 @@ setupNodeEvents(on, config) {
 
 ## tests
 
-- [x] ensure that we are asserting on the various structures that are in the integration suite's test examples in fixtures
+- [ ] ensure that we are asserting on the various structures that are in the integration suite's test examples in fixtures
 - [ ] set up CI running static analysis and tests, using GitHub Actions (triggered by all branches)
   - use `npm ci --ignore-scripts`
 
