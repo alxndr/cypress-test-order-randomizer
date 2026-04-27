@@ -280,11 +280,11 @@ describe('createPreprocessor', () => {
       const positionsInB = orderOf(testNames, outputB)
       const shuffleInA = testNames
         .map((name, idx) => ({ name, pos: positionsInA[idx]! }))
-        .sort((x, y) => x.pos - y.pos)
+        .toSorted((x, y) => x.pos - y.pos)
         .map(({ name }) => name)
       const shuffleInB = testNames
         .map((name, idx) => ({ name, pos: positionsInB[idx]! }))
-        .sort((x, y) => x.pos - y.pos)
+        .toSorted((x, y) => x.pos - y.pos)
         .map(({ name }) => name)
       expect(shuffleInA).toEqual(shuffleInB)
     } finally {
