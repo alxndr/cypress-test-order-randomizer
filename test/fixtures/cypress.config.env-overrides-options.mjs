@@ -1,6 +1,8 @@
 // Fixture config used by the "env overrides programmatic options" e2e scenario.
-// options sets randomizeBlocks: false, but the test runner passes
+
+// The app code options sets randomizeBlocks: false, but the test runner passes
 // --env randomizeBlocks=true,seed=42 which must take priority.
+
 import { defineConfig } from 'cypress'
 import { definePlugin } from '../../dist/index.js'
 
