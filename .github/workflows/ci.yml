@@ -2,6 +2,7 @@ name: CI
 
 on:
   push:
+    branches: [main]
   pull_request:
 
 jobs:
@@ -35,7 +36,7 @@ jobs:
       - run: npm run test:unit
 
   e2e:
-    # NOTE: This job only runs if everything from the `validate` matrix succeeds
+    # NOTE: This job only runs if the `validate` matrix succeeds
     name: E2E Tests
     runs-on: ubuntu-latest
     needs: [validate]
