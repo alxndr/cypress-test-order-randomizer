@@ -1,6 +1,6 @@
 {
   "name": "cypress-test-order-randomizer",
-  "version": "0.1.0-beta.1",
+  "version": "0.1.0-beta.2",
   "description": "WIP — Cypress v15 plugin that randomizes the order in which tests are run (in a reproducible way, and using AST manipulation)",
   "type": "module",
   "main": "dist/cjs/index.js",
