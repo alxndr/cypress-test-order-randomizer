@@ -7,16 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Tests
-
-- Unit test asserting that two preprocessors with different `projectRoot` values
-  but the same spec path relative to their respective roots produce an identical
-  block shuffle for a given seed — directly verifying the `relativeFilePath`
-  PRNG seeding behavior introduced in 0.1.0-beta.2
-
-
-## [0.1.0-beta.2] - 2026-04-27
-
 ### Added
 
 - `CONTRIBUTING.md` covering local development setup, project layout, available
@@ -30,6 +20,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and asserts the execution order is identical — covering the primary
   reproducibility use case documented in the README
 
+### Changed
+
+- Upgraded internal TypeScript toolchain from v5 to v6; no impact on
+  consumers, but the CJS build now requires `"ignoreDeprecations": "6.0"` to
+  suppress the `node10` moduleResolution deprecation warning until the
+  dual-package build strategy is reworked before TypeScript 7
+- CI `push` trigger scoped to `main` branch only, eliminating redundant
+  double-triggering when pushing commits to a PR branch
+
+### Tests
+
+- Unit test asserting that two preprocessors with different `projectRoot` values
+  but the same spec path relative to their respective roots produce an identical
+  block shuffle for a given seed — directly verifying the `relativeFilePath`
+  PRNG seeding behavior introduced in 0.1.0-beta.2
+
+
+## [0.1.0-beta.2] - 2026-04-26
+
 ### Fixed
 
 - Block-order shuffle now uses a project-relative file path when deriving the
@@ -41,17 +50,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   block order after upgrading.
 - README documentation updated with `relativeFilePath` (relative to project root)
 
-### Changed
-
-- Upgraded internal TypeScript toolchain from v5 to v6; no impact on
-  consumers, but the CJS build now requires `"ignoreDeprecations": "6.0"` to
-  suppress the `node10` moduleResolution deprecation warning until the
-  dual-package build strategy is reworked before TypeScript 7
-- CI `push` trigger scoped to `main` branch only, eliminating redundant
-  double-triggering when pushing commits to a PR branch
-
 
 ## [0.1.0-beta.1] - 2026-04-26
+
+Seems to be working...
 
 ### Added
 
