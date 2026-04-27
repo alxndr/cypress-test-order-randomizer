@@ -2,7 +2,12 @@
   "extends": "./tsconfig.build.json",
   "compilerOptions": {
     "module": "CommonJS",
-    "moduleResolution": "Node",
+    // node10 (CJS resolution) is deprecated in TS6 and removed in TS7.
+    // The correct fix is to restructure the dual-package build to avoid
+    // "module": "CommonJS" entirely (e.g. use .cts sources or tsup).
+    // Until then, ignoreDeprecations silences the TS5107 error.
+    "moduleResolution": "node10",
+    "ignoreDeprecations": "6.0",
     "outDir": "dist/cjs",
     "declaration": false,
     "declarationMap": false,

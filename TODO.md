@@ -5,11 +5,12 @@ There may also be `TODO` strings in the app/test code or comments; ideally they 
 
 ## versions
 
-- [ ] attempt upgrade to TypeScript v6
+- [x] upgrade to TypeScript v6
 
 
 ## deploying
 
+- [ ] review https://glebbahmutov.com/blog/how-i-publish-to-npm/ and see how that might inform what we're doing
 - [ ] set up a GitHub Actions workflow with `workflow_dispatch` (manual trigger) that builds, runs tests, then publishes to npm using an `NPM_TOKEN` repository secret — enforces the full build+test+publish sequence without relying on the publisher's memory, while keeping the publish decision human-initiated rather than fully automatic
 
 
