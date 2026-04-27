@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { EventEmitter } from 'node:events'
-import { mkdtemp, rm, writeFile, readFile } from 'node:fs/promises'
+import { mkdtemp, mkdir, rm, writeFile, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { createPreprocessor } from '../src/preprocessor.js'
@@ -229,5 +229,67 @@ describe('createPreprocessor', () => {
 
     const output = await readFile(outputPath, 'utf-8')
     expect(output).toContain('empty suite')
+  })
+
+  it('same relative path under different project roots produces the same block order', async () => {
+    // Simulates two different checkout locations (e.g. CI vs local) where the
+    // spec lives at the same path relative to the project root. The per-file
+    // PRNG seed is derived from `${seed}:${relativeFilePath}`, so as long as
+    // the relative path is the same the shuffle must be identical regardless of
+    // where on disk the project lives.
+    const specContent = `
+      describe('suite', () => {
+        it('A', () => {})
+        it('B', () => {})
+        it('C', () => {})
+        it('D', () => {})
+        it('E', () => {})
+        it('F', () => {})
+      })
+    `
+    const relativeSpecPath = join('cypress', 'e2e', 'relative-path-check.cy.ts')
+
+    const rootA = await mkdtemp(join(tmpdir(), 'ctr-root-a-'))
+    const rootB = await mkdtemp(join(tmpdir(), 'ctr-root-b-'))
+    try {
+      await mkdir(join(rootA, 'cypress', 'e2e'), { recursive: true })
+      await mkdir(join(rootB, 'cypress', 'e2e'), { recursive: true })
+
+      const specPathA = join(rootA, relativeSpecPath)
+      const specPathB = join(rootB, relativeSpecPath)
+      const outputPathA = join(rootA, 'out.cy.js')
+      const outputPathB = join(rootB, 'out.cy.js')
+
+      await writeFile(specPathA, specContent)
+      await writeFile(specPathB, specContent)
+
+      // Sanity-check: the two absolute paths must differ, otherwise the test
+      // would pass even if absolute paths were used for the PRNG seed.
+      expect(specPathA).not.toBe(specPathB)
+
+      await createPreprocessor({ seed: 42, randomizeBlocks: true, projectRoot: rootA })(createMockFile(specPathA, outputPathA))
+      await createPreprocessor({ seed: 42, randomizeBlocks: true, projectRoot: rootB })(createMockFile(specPathB, outputPathB))
+
+      const outputA = await readFile(outputPathA, 'utf-8')
+      const outputB = await readFile(outputPathB, 'utf-8')
+
+      // esbuild embeds the absolute file path as a comment in the bundle, so
+      // the raw outputs differ. Compare only the shuffled order of test names.
+      const testNames = ['A', 'B', 'C', 'D', 'E', 'F']
+      const positionsInA = orderOf(testNames, outputA)
+      const positionsInB = orderOf(testNames, outputB)
+      const shuffleInA = testNames
+        .map((name, idx) => ({ name, pos: positionsInA[idx]! }))
+        .sort((x, y) => x.pos - y.pos)
+        .map(({ name }) => name)
+      const shuffleInB = testNames
+        .map((name, idx) => ({ name, pos: positionsInB[idx]! }))
+        .sort((x, y) => x.pos - y.pos)
+        .map(({ name }) => name)
+      expect(shuffleInA).toEqual(shuffleInB)
+    } finally {
+      await rm(rootA, { recursive: true })
+      await rm(rootB, { recursive: true })
+    }
   })
 })

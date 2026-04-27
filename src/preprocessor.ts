@@ -85,8 +85,12 @@ export function createPreprocessor(
 
     if (shouldWatch && !activeWatchers.has(filePath)) {
       const watcher = watch(filePath, async () => {
-        const freshRandomFn = randomizeBlocks ? createPrng(`${seed}:${relPath}`) : null
-        await buildSpec(filePath, outputPath, createTransformPlugin(filePath, freshRandomFn))
+        // Re-constructing from the same inputs intentionally produces the same
+        // sequence as randomFn — randomFn is exhausted after the initial build
+        // and cannot be rewound.
+        await buildSpec(filePath, outputPath, createTransformPlugin(filePath,
+          randomizeBlocks ? createPrng(`${seed}:${relPath}`) : null
+        ))
         file.emit('rerun')
       })
 

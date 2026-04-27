@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Tests
+
+- Unit test asserting that two preprocessors with different `projectRoot` values
+  but the same spec path relative to their respective roots produce an identical
+  block shuffle for a given seed — directly verifying the `relativeFilePath`
+  PRNG seeding behavior introduced in 0.1.0-beta.2
+
 
 ## [0.1.0-beta.2] - 2026-04-27
 
