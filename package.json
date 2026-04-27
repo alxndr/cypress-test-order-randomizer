@@ -1,7 +1,7 @@
 {
   "name": "cypress-test-order-randomizer",
   "version": "0.1.0-beta.2",
-  "description": "WIP — Cypress v15 plugin that randomizes the order in which tests are run (in a reproducible way, and using AST manipulation)",
+  "description": "Cypress plugin which randomizes the order in which tests are run (in a reproducible way, and using AST manipulation)",
   "type": "module",
   "main": "dist/cjs/index.js",
   "types": "dist/index.d.ts",
@@ -39,6 +39,14 @@
     "ast"
   ],
   "files": ["dist", "README.md", "LICENSE"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alxndr/cypress-test-order-randomizer.git"
+  },
+  "author": "@alxndr",
+  "contributors": ["@alxndr", "Claude Code"],
+  "bugs": "https://github.com/alxndr/cypress-test-order-randomizer/issues",
+  "homepage": "https://github.com/alxndr/cypress-test-order-randomizer#readme",
   "license": "MIT",
   "engines": {
     "node": ">=22.0.0",

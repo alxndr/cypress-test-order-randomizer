@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `CONTRIBUTING.md` covering local development setup, project layout, available
+  scripts, PR submission guidelines, and the maintainer release process
+- GitHub Actions `publish.yml` workflow for manual npm publishing: triggered via
+  `workflow_dispatch` from `main` branch only; dist-tag is inferred
+  automatically from the version string (`0.1.0-beta.3` → `--tag beta`,
+  `1.0.0` → `--tag latest`)
+- E2e test validating the seed-capture-and-replay workflow: runs Cypress without
+  a seed, captures the auto-generated seed from stdout, reruns with that seed,
+  and asserts the execution order is identical — covering the primary
+  reproducibility use case documented in the README
+
 ### Fixed
 
 - Block-order shuffle now uses a project-relative file path when deriving the
@@ -16,6 +29,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   diverge. **Note:** this changes the shuffle produced by any existing seed for
   block ordering; seeds captured before this fix will not reproduce the same
   block order after upgrading.
+- README documentation incorrectly described the per-file block-order seed as
+  using `absoluteFilePath`; corrected to `relativeFilePath` (relative to
+  project root), matching the actual implementation
+
+### Changed
+
+- Upgraded internal TypeScript toolchain from v5 to v6; no impact on
+  consumers, but the CJS build now requires `"ignoreDeprecations": "6.0"` to
+  suppress the `node10` moduleResolution deprecation warning until the
+  dual-package build strategy is reworked before TypeScript 7
+- CI `push` trigger scoped to `main` branch only, eliminating redundant
+  double-triggering when pushing commits to a PR branch
 
 
 ## [0.1.0-beta.1] - 2026-04-26

@@ -1,13 +1,13 @@
 # cypress-test-order-randomizer
 
-Like it says on the tin. 🥫
+This [Cypress](https://cypress.io) v15 plugin randomizes the execution order of your test suite.
 
-This is a plugin for [Cypress](https://cypress.io) that randomizes the execution order of your test suite. It allows for spec files to be shuffled, and the `describe`/`it`/`test` blocks within them to be shuffled separately.
+It allows for independently shuffling the order in which test files are run, and the order of the `describe`/`it`/`test` blocks within them. The seed value printed at the start of each run (or provided via config) makes any shuffle exactly reproducible.
 
-Tested against Cypress v15 and NodeJS >= v22.
+Much of this code was written by Claude Code, with human supervision.
 
 
-### ...why??
+## ...why??
 
 Predictably randomizing the order of your tests can expose unintentional execution-ordering dependencies between tests. Using a seed value for the ordering means that we can reliably recreate a given ordering once it's been generated.
 
@@ -15,6 +15,8 @@ In sum, it contributes to making test suites more robust.
 
 
 ## Installation
+
+Requires Node.js ≥ 22.
 
 ```sh
 npm install --save-dev cypress-test-order-randomizer
@@ -154,6 +156,11 @@ Useful for temporarily debugging an ordering issue without touching
 
 3. **Reproducibility** — The PRNG is a counter-mode SHA-256 construction built
    on Node.js's built-in `crypto` module. No hand-rolled math.
+
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for local development setup, project layout, available scripts, and the maintainer release process.
 
 
 ## inspiration / prior art
