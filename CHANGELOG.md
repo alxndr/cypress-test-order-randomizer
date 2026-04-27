@@ -7,13 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [0.1.0-beta.2] - 2026-04-27
+
 ### Added
 
 - `CONTRIBUTING.md` covering local development setup, project layout, available
   scripts, PR submission guidelines, and the maintainer release process
 - GitHub Actions `publish.yml` workflow for manual npm publishing: triggered via
   `workflow_dispatch` from `main` branch only; dist-tag is inferred
-  automatically from the version string (`0.1.0-beta.3` → `--tag beta`,
+  automatically from the version string (`0.1.0-beta.2` → `--tag beta`,
   `1.0.0` → `--tag latest`)
 - E2e test validating the seed-capture-and-replay workflow: runs Cypress without
   a seed, captures the auto-generated seed from stdout, reruns with that seed,
@@ -29,9 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   diverge. **Note:** this changes the shuffle produced by any existing seed for
   block ordering; seeds captured before this fix will not reproduce the same
   block order after upgrading.
-- README documentation incorrectly described the per-file block-order seed as
-  using `absoluteFilePath`; corrected to `relativeFilePath` (relative to
-  project root), matching the actual implementation
+- README documentation updated with `relativeFilePath` (relative to project root)
 
 ### Changed
 
@@ -45,7 +46,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.0-beta.1] - 2026-04-26
 
-First public beta release.
+### Added
+
+- Seed is now also printed after all specs finish via `after:run`, making it
+  easy to spot in the results summary without scrolling back to the top
+- CI tests against multiple Node.js versions in parallel (matrix strategy)
+
+### Notes
+
+- Requires Node.js ≥ 22 and Cypress ≥ 15
+- `esbuild` is a peer dependency (optional at install time; required at
+  runtime when `randomizeBlocks` is enabled)
+- Cypress does not guarantee execution order from an array `specPattern`
+  (open issues [#31758](https://github.com/cypress-io/cypress/issues/31758),
+  [#29067](https://github.com/cypress-io/cypress/issues/29067)), so file-order
+  randomization is best-effort
+
+
+## [0.1.0-alpha.2] - 2026-04-26
+
+### Fixed
+
+- Unit test for same-seed reproducibility incorrectly used different file paths
+  for the two preprocessor runs; because the per-file PRNG seed is derived from
+  `${seed}:${filePath}`, different paths produced different shuffles and the
+  test was not actually validating reproducibility. Fixed to use the same input
+  path for both runs, writing to two separate output files.
+
+
+## [0.1.0-alpha.1] - 2026-04-26
+
+Initial implementation.
 
 ### Added
 
@@ -62,8 +93,7 @@ First public beta release.
   PRNG drives all shuffles; passing the same seed reproduces the exact same
   execution order; when no seed is provided, a random one is generated and
   printed to stdout so any run can be replayed
-- Seed is printed at startup and again after all specs finish (via
-  `after:run`), making it easy to spot in the results summary
+- Seed is printed at startup
 - Per-file PRNG derivation (`seed + filePath`) keeps each spec's block shuffle
   independent and stable across partial re-runs
 - All three options can be set or overridden at runtime via Cypress's `--env`
@@ -76,14 +106,13 @@ First public beta release.
 - Support for `.ts`, `.tsx`, `.js`, and `.jsx` spec files
 - File watcher support: the preprocessor watches for source changes and
   re-bundles + re-shuffles automatically during `cypress open`
-- CI via GitHub Actions: lint (`oxlint`), typecheck, and unit tests (Vitest) run across a range of supported Node.js versions in parallel, on every PR push and main-branch commit; longer-running end-to-end tests run after those pass, on a single Node.js version
+- CI via GitHub Actions: lint (`oxlint`), typecheck, and unit tests (Vitest)
+  on every PR and main-branch push; longer-running end-to-end tests run after
+  those pass, on a single Node.js version
 
-### Notes
 
-- Requires Node.js ≥ 22 and Cypress ≥ 15
-- `esbuild` is a peer dependency (optional at install time; required at
-  runtime when `randomizeBlocks` is enabled)
-- Cypress does not guarantee execution order from an array `specPattern`
-  (open issues [#31758](https://github.com/cypress-io/cypress/issues/31758),
-  [#29067](https://github.com/cypress-io/cypress/issues/29067)), so file-order
-  randomization is best-effort
+[Unreleased]: https://github.com/alxndr/cypress-test-order-randomizer/compare/v0.1.0-beta.2...HEAD
+[0.1.0-beta.2]: https://github.com/alxndr/cypress-test-order-randomizer/compare/v0.1.0-beta.1...v0.1.0-beta.2
+[0.1.0-beta.1]: https://github.com/alxndr/cypress-test-order-randomizer/compare/v0.1.0-alpha.2...v0.1.0-beta.1
+[0.1.0-alpha.2]: https://github.com/alxndr/cypress-test-order-randomizer/compare/v0.1.0-alpha.1...v0.1.0-alpha.2
+[0.1.0-alpha.1]: https://github.com/alxndr/cypress-test-order-randomizer/releases/tag/v0.1.0-alpha.1

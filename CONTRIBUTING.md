@@ -63,13 +63,22 @@ test/
    Use a prerelease identifier for releases that aren't ready for general use
    (e.g. `0.2.0-beta.1`).
 
-2. **Update `CHANGELOG.md`** — promote the `[Unreleased]` section to a versioned
-   entry with today's date (e.g. `[0.2.0-beta.1] - 2026-05-01`), and leave a
-   fresh empty `[Unreleased]` section at the top.
+2. **Update `CHANGELOG.md`** — create a fresh empty `[Unreleased]` section above
+   the existing one, and rename the existing one to today's date plus the new
+   version string linked up to a diff between the prior version and this version
+   (e.g. `[0.2.0-beta.1] - 2026-05-01`).
 
 3. **Merge to `main`.**
 
-4. **Trigger the publish workflow** from the GitHub Actions UI (Actions →
+4. **Tag the release and push the tag** — the tag is needed for the CHANGELOG
+   comparison links to resolve on GitHub, and creates a permanent marker in
+   git history. The tag does _not_ trigger publishing (that's a separate step).
+   ```sh
+   git tag v0.2.0-beta.1
+   git push origin v0.2.0-beta.1
+   ```
+
+5. **Trigger the publish workflow** from the GitHub Actions UI (Actions →
    Publish → Run workflow). The workflow must be run from the `main` branch.
    It will lint, typecheck, unit-test, and build before publishing.
 
@@ -80,7 +89,7 @@ test/
    The workflow requires an `NPM_TOKEN` secret to be configured in the
    repository settings (Settings → Secrets → Actions).
 
-5. **Verify the registry** before triggering if doing a manual publish outside
+6. **Verify the registry** before triggering if doing a manual publish outside
    the workflow. If your local npm config points at a private or corporate
    registry, `npm publish` will go there instead of the public registry.
    Check with `npm get registry` — it should return `https://registry.npmjs.org/`.
