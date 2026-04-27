@@ -105,5 +105,9 @@ export async function definePlugin<T extends CypressPluginConfig>(
     on('file:preprocessor', createPreprocessor({ seed, randomizeBlocks: true }))
   }
 
+  on('after:run', () => {
+    process.stdout.write(`[cypress-test-order-randomizer] Seed: ${seed}\n`)
+  })
+
   return config
 }
