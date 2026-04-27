@@ -16,6 +16,7 @@ export interface CypressPreprocessorFile extends EventEmitter {
 export interface PreprocessorOptions {
   seed: string | number
   randomizeBlocks: boolean
+  projectRoot: string
 }
 
 function inferLoader(filePath: string): esbuild.Loader {
@@ -70,19 +71,21 @@ async function buildSpec(
 export function createPreprocessor(
   options: PreprocessorOptions
 ): (file: CypressPreprocessorFile) => Promise<string> {
-  const { seed, randomizeBlocks } = options
+  const { seed, randomizeBlocks, projectRoot } = options
   const activeWatchers = new Map<string, FSWatcher>()
 
   return async function processFile(file: CypressPreprocessorFile): Promise<string> {
     const { filePath, outputPath, shouldWatch } = file
 
-    // Derive a per-file PRNG so each spec's shuffle is independent but stable
-    const randomFn = randomizeBlocks ? createPrng(`${seed}:${filePath}`) : null
+    // Use the project-relative path so the per-file seed is identical across
+    // environments regardless of where the project is checked out.
+    const relPath = nodePath.relative(projectRoot, filePath)
+    const randomFn = randomizeBlocks ? createPrng(`${seed}:${relPath}`) : null
     await buildSpec(filePath, outputPath, createTransformPlugin(filePath, randomFn))
 
     if (shouldWatch && !activeWatchers.has(filePath)) {
       const watcher = watch(filePath, async () => {
-        const freshRandomFn = randomizeBlocks ? createPrng(`${seed}:${filePath}`) : null
+        const freshRandomFn = randomizeBlocks ? createPrng(`${seed}:${relPath}`) : null
         await buildSpec(filePath, outputPath, createTransformPlugin(filePath, freshRandomFn))
         file.emit('rerun')
       })

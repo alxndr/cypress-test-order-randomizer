@@ -20,6 +20,9 @@ export function createPrng(seed: string | number): () => number {
 /**
  * Fisher-Yates shuffle — returns a new array with elements in a randomized
  * order determined by randomFn. Does not mutate the input array.
+ *
+ * @param randomFn - Must return values in [0, 1). Values outside that range
+ *   will produce an out-of-bounds index. Use createPrng() as the source.
  */
 export function shuffleArray<T>(arr: readonly T[], randomFn: () => number): T[] {
   const result = [...arr]

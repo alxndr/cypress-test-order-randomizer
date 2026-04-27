@@ -102,7 +102,8 @@ export async function definePlugin<T extends CypressPluginConfig>(
   }
 
   if (randomizeBlocks) {
-    on('file:preprocessor', createPreprocessor({ seed, randomizeBlocks: true }))
+    const projectRoot = config.projectRoot ?? process.cwd()
+    on('file:preprocessor', createPreprocessor({ seed, randomizeBlocks: true, projectRoot }))
   }
 
   on('after:run', () => {

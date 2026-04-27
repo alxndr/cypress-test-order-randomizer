@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- Block-order shuffle now uses a project-relative file path when deriving the
+  per-file PRNG seed, so a given seed reproduces the same block order on any
+  machine regardless of where the project is checked out. Previously the
+  absolute path was used, causing CI and local block shuffles to silently
+  diverge. **Note:** this changes the shuffle produced by any existing seed for
+  block ordering; seeds captured before this fix will not reproduce the same
+  block order after upgrading.
+
+
 ## [0.1.0-beta.1] - 2026-04-26
 
 First public beta release.

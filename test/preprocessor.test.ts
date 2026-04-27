@@ -31,7 +31,7 @@ describe('createPreprocessor', () => {
   })
 
   it('returns a function', () => {
-    const handler = createPreprocessor({ seed: 42, randomizeBlocks: true })
+    const handler = createPreprocessor({ seed: 42, randomizeBlocks: true, projectRoot: tempDir })
     expect(typeof handler).toBe('function')
   })
 
@@ -40,7 +40,7 @@ describe('createPreprocessor', () => {
     const outputPath = join(tempDir, 'example.cy.js')
     await writeFile(specPath, `it('test', () => {})`)
 
-    const handler = createPreprocessor({ seed: 42, randomizeBlocks: true })
+    const handler = createPreprocessor({ seed: 42, randomizeBlocks: true, projectRoot: tempDir })
     const result = await handler(createMockFile(specPath, outputPath))
     expect(result).toBe(outputPath)
   })
@@ -50,7 +50,7 @@ describe('createPreprocessor', () => {
     const outputPath = join(tempDir, 'example.cy.js')
     await writeFile(specPath, `it('test', () => {})`)
 
-    await createPreprocessor({ seed: 42, randomizeBlocks: true })(createMockFile(specPath, outputPath))
+    await createPreprocessor({ seed: 42, randomizeBlocks: true, projectRoot: tempDir })(createMockFile(specPath, outputPath))
 
     const output = await readFile(outputPath, 'utf-8')
     expect(output.length).toBeGreaterThan(0)
@@ -67,7 +67,7 @@ describe('createPreprocessor', () => {
       })
     `)
 
-    await createPreprocessor({ seed: 42, randomizeBlocks: true })(createMockFile(specPath, outputPath))
+    await createPreprocessor({ seed: 42, randomizeBlocks: true, projectRoot: tempDir })(createMockFile(specPath, outputPath))
 
     const output = await readFile(outputPath, 'utf-8')
     expect(output).toContain('test A')
@@ -94,8 +94,8 @@ describe('createPreprocessor', () => {
     await writeFile(spec1, specContent)
     await writeFile(spec2, specContent)
 
-    await createPreprocessor({ seed: 1, randomizeBlocks: true })(createMockFile(spec1, out1))
-    await createPreprocessor({ seed: 2, randomizeBlocks: true })(createMockFile(spec2, out2))
+    await createPreprocessor({ seed: 1, randomizeBlocks: true, projectRoot: tempDir })(createMockFile(spec1, out1))
+    await createPreprocessor({ seed: 2, randomizeBlocks: true, projectRoot: tempDir })(createMockFile(spec2, out2))
 
     const output1 = await readFile(out1, 'utf-8')
     const output2 = await readFile(out2, 'utf-8')
@@ -119,8 +119,8 @@ describe('createPreprocessor', () => {
       })
     `)
 
-    await createPreprocessor({ seed: 99, randomizeBlocks: true })(createMockFile(specPath, out1))
-    await createPreprocessor({ seed: 99, randomizeBlocks: true })(createMockFile(specPath, out2))
+    await createPreprocessor({ seed: 99, randomizeBlocks: true, projectRoot: tempDir })(createMockFile(specPath, out1))
+    await createPreprocessor({ seed: 99, randomizeBlocks: true, projectRoot: tempDir })(createMockFile(specPath, out2))
 
     const output1 = await readFile(out1, 'utf-8')
     const output2 = await readFile(out2, 'utf-8')
@@ -140,7 +140,7 @@ describe('createPreprocessor', () => {
       })
     `)
 
-    await createPreprocessor({ seed: 42, randomizeBlocks: false })(createMockFile(specPath, outputPath))
+    await createPreprocessor({ seed: 42, randomizeBlocks: false, projectRoot: tempDir })(createMockFile(specPath, outputPath))
 
     const output = await readFile(outputPath, 'utf-8')
     const positions = orderOf(['A', 'B', 'C', 'D', 'E'], output)
@@ -155,7 +155,7 @@ describe('createPreprocessor', () => {
     await writeFile(specPath, `it('test', () => {})`)
 
     const file = createMockFile(specPath, outputPath)
-    await createPreprocessor({ seed: 42, randomizeBlocks: true })(file)
+    await createPreprocessor({ seed: 42, randomizeBlocks: true, projectRoot: tempDir })(file)
     expect(() => file.emit('close')).not.toThrow()
   })
 
@@ -169,7 +169,7 @@ describe('createPreprocessor', () => {
       })
     `)
 
-    const handler = createPreprocessor({ seed: 42, randomizeBlocks: true })
+    const handler = createPreprocessor({ seed: 42, randomizeBlocks: true, projectRoot: tempDir })
     await expect(handler(createMockFile(specPath, outputPath))).resolves.toBe(outputPath)
 
     const output = await readFile(outputPath, 'utf-8')
@@ -190,7 +190,7 @@ describe('createPreprocessor', () => {
       })
     `)
 
-    const handler = createPreprocessor({ seed: 42, randomizeBlocks: true })
+    const handler = createPreprocessor({ seed: 42, randomizeBlocks: true, projectRoot: tempDir })
     await expect(handler(createMockFile(specPath, outputPath))).resolves.toBe(outputPath)
 
     const output = await readFile(outputPath, 'utf-8')
@@ -211,7 +211,7 @@ describe('createPreprocessor', () => {
       })
     `)
 
-    const handler = createPreprocessor({ seed: 42, randomizeBlocks: true })
+    const handler = createPreprocessor({ seed: 42, randomizeBlocks: true, projectRoot: tempDir })
     await expect(handler(createMockFile(specPath, outputPath))).resolves.toBe(outputPath)
 
     const output = await readFile(outputPath, 'utf-8')
@@ -224,7 +224,7 @@ describe('createPreprocessor', () => {
     const outputPath = join(tempDir, 'empty-describe.cy.js')
     await writeFile(specPath, `describe('empty suite', () => {})`)
 
-    const handler = createPreprocessor({ seed: 42, randomizeBlocks: true })
+    const handler = createPreprocessor({ seed: 42, randomizeBlocks: true, projectRoot: tempDir })
     await expect(handler(createMockFile(specPath, outputPath))).resolves.toBe(outputPath)
 
     const output = await readFile(outputPath, 'utf-8')
