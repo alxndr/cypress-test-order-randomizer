@@ -35,10 +35,7 @@ jobs:
       - run: npm run test:unit
 
   e2e:
-    # NOTE: this job runs a build and launches several Cypress processes, and
-    # so takes a longer time than the `validate` job. Therefore it is only
-    # launched once the `validate` job succeeds with the matrix of Node and
-    # Cypress versions.
+    # NOTE: This job only runs if everything from the `validate` matrix succeeds
     name: E2E Tests
     runs-on: ubuntu-latest
     needs: [validate]
