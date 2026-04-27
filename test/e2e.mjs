@@ -5,10 +5,13 @@
  * This will run real Cypress processes against the fixture project in fixtures/
  * and validates that test execution order matches what the plugin promises.
  *
- * Each cypress run takes 30–60 s; the full suite runs seven of them (~6 min).
+ * Each cypress run takes 30–60 s; the full suite runs nine of them (~7–8 min).
  * suite-d (.cy.tsx) is included in all runs; no extra run is needed for it.
  * Two extra runs use alternate fixture configs to validate the programmatic
  * options path and the --env-overrides-options priority rule.
+ * Two final runs validate the seed-capture-and-replay workflow: one unseeded
+ * run captures its auto-generated seed from stdout, then a second run uses
+ * that seed to verify the order is exactly reproduced.
  *
  * Usage: node test/e2e.mjs   (or via `npm run test:e2e`)
  */
@@ -89,7 +92,10 @@ function runCypress({ env = undefined, configFile = undefined } = {}) {
     )
   }
 
-  return { passing, failing }
+  const seedMatch = result.stdout.match(/\[cypress-test-order-randomizer\] Seed: (\S+)/)
+  const seed = seedMatch?.[1] ?? null
+
+  return { passing, failing, seed }
 }
 
 // ---------------------------------------------------------------------------
@@ -111,11 +117,20 @@ const scenarios = [
     configFile: 'cypress.config.env-overrides-options.mjs' },
 ]
 
+const TOTAL_RUNS = scenarios.length + 2 // +2 for the seed-capture replay pair
+
 const results = []
 for (const [index, { label, env, configFile }] of scenarios.entries()) {
-  console.log(`[${index + 1}/${scenarios.length}] Running Cypress: ${label}`)
+  console.log(`[${index + 1}/${TOTAL_RUNS}] Running Cypress: ${label}`)
   results.push(runCypress({ env, configFile }))
 }
+
+console.log(`[${scenarios.length + 1}/${TOTAL_RUNS}] Running Cypress: no seed (capturing auto-generated seed)`)
+const captureResult = runCypress()
+const capturedSeed = captureResult.seed
+
+console.log(`[${scenarios.length + 2}/${TOTAL_RUNS}] Running Cypress: replaying captured seed ${capturedSeed}`)
+const replayResult = runCypress({ env: `seed=${capturedSeed}` })
 
 const [
   resultSeed42a,
@@ -293,6 +308,16 @@ check('programmatic options: seed + randomizeBlocks=false produces same order as
   // options-only config hardcodes seed=42 + randomizeBlocks=false, no --env passed.
   // Must produce identical passing order to the --env seed=42,randomizeBlocks=false run.
   assert.deepEqual(resultOptionsOnly.passing, orderNoBlocks)
+})
+
+// -- seed capture and replay -------------------------------------------------
+
+check('auto-generated seed is present in Cypress output', () => {
+  assert.ok(capturedSeed !== null, 'seed line must appear in stdout')
+})
+
+check('replaying a captured seed reproduces the exact execution order', () => {
+  assert.deepEqual(captureResult.passing, replayResult.passing)
 })
 
 // -- priority: --env overrides programmatic options --------------------------
