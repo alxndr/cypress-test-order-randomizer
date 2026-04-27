@@ -15,14 +15,23 @@ import { shuffleArray } from './seeded-random.js'
 // we have to unwrap .default ourselves to get the actual function.
 const generate = ((_generate as unknown as { default: typeof _generate }).default) ?? _generate
 
-// Cypress/Mocha functions that open a new nested scope
+// Cypress uses Mocha as its underlying test runner. The function names below
+// originate from Mocha's API and are exposed as globals in Cypress spec files.
+// Hooks (before, after, beforeEach, afterEach) are also part of Mocha's API
+// but are intentionally excluded here — they must stay in place for correct
+// test setup/teardown behavior.
+//
+// TODO: express this Cypress→Mocha dependency more explicitly in types or a
+// dedicated module so the relationship is machine-checkable, not just a comment.
+
+// Block-scoping functions — open a new nested scope:
 const DESCRIBE_LIKE_NAMES = new Set([
   'describe', 'context',
   'describe.only', 'describe.skip',
   'context.only', 'context.skip',
 ])
 
-// Cypress/Mocha leaf test functions
+// Leaf test functions:
 const IT_LIKE_NAMES = new Set([
   'it', 'test', 'specify',
   'it.only', 'it.skip',
