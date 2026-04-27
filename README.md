@@ -118,7 +118,7 @@ The global `seed` drives two independent shuffles:
 | Shuffle | Derived seed | Scope |
 |---|---|---|
 | File order | `seed` directly | One shuffle of the full spec list |
-| Block order (per spec) | `${seed}:${absoluteFilePath}` | One shuffle per spec file |
+| Block order (per spec) | `${seed}:${relativeFilePath}` | One shuffle per spec file, path is relative to project root so the seed is identical across environments |
 
 Because block-level seeds include the file path, two spec files always receive
 **different** block shuffles from the same global seed — and those shuffles are
