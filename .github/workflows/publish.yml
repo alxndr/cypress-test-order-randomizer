@@ -1,0 +1,58 @@
+name: Publish
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    # Prevent accidental publishes from feature branches.
+    # workflow_dispatch lets you pick any branch in the UI — this ensures
+    # only main can actually publish.
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      # registry-url is required for NODE_AUTH_TOKEN to be picked up by npm.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          check-latest: true
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm run test:unit
+
+      - name: Build
+        run: npm run build
+
+      # Infer the npm dist-tag from the version in package.json:
+      #   0.1.0-beta.3  →  beta
+      #   1.0.0         →  latest
+      # Add a new branch here if you ever use a different prerelease label (e.g. alpha, rc).
+      - name: Infer dist-tag from package.json version
+        id: dist_tag
+        run: |
+          TAG=$(node -e "
+            const v = require('./package.json').version;
+            const m = v.match(/\d+\.\d+\.\d+-([a-zA-Z]+)/);
+            process.stdout.write(m ? m[1] : 'latest');
+          ")
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Inferred dist-tag: $TAG"
+
+      - name: Publish to npm (--tag ${{ steps.dist_tag.outputs.tag }})
+        run: npm publish --tag ${{ steps.dist_tag.outputs.tag }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
