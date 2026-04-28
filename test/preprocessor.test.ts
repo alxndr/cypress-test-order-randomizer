@@ -159,6 +159,31 @@ describe('createPreprocessor', () => {
     expect(() => file.emit('close')).not.toThrow()
   })
 
+  it('emitting close with shouldWatch=true tears down the watcher', async () => {
+    const specPath = join(tempDir, 'watched.cy.ts')
+    const outputPath = join(tempDir, 'watched.cy.js')
+    await writeFile(specPath, `it('watched test', () => {})`)
+
+    const file = createMockFile(specPath, outputPath, /* shouldWatch= */ true)
+    await createPreprocessor({ seed: 42, randomizeBlocks: true, projectRoot: tempDir })(file)
+
+    // Tear down before writing — guarantees no fs event is pre-queued.
+    file.emit('close')
+
+    let rerunFired = false
+    file.on('rerun', () => { rerunFired = true })
+
+    // If the watcher were still alive, writing here would trigger a rebuild
+    // and eventually emit 'rerun'. It must not.
+    await writeFile(specPath, `it('changed test', () => {})`)
+
+    // Wait long enough for an fs.watch callback + esbuild build to complete
+    // if the watcher were erroneously still active.
+    await new Promise<void>(resolve => setTimeout(resolve, 500))
+
+    expect(rerunFired).toBe(false)
+  })
+
   it('handles a TypeScript spec with type annotations', async () => {
     const specPath = join(tempDir, 'typed.cy.ts')
     const outputPath = join(tempDir, 'typed.cy.js')

@@ -15,10 +15,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `workflow_dispatch` from `main` branch only; dist-tag is inferred
   automatically from the version string (`0.1.0-beta.2` → `--tag beta`,
   `1.0.0` → `--tag latest`)
-- E2e test validating the seed-capture-and-replay workflow: runs Cypress without
+- E2E test validating the seed-capture-and-replay workflow: runs Cypress without
   a seed, captures the auto-generated seed from stdout, reruns with that seed,
   and asserts the execution order is identical — covering the primary
   reproducibility use case documented in the README
+- Unit test asserting that two preprocessors with different `projectRoot` values
+  but the same spec path relative to their respective roots produce an identical
+  block shuffle for a given seed — directly verifying the `relativeFilePath`
+  PRNG seeding behavior introduced in 0.1.0-beta.2
+- Unit test verifying that emitting close on a watched spec file (shouldWatch=true)
+  tears down the FSWatcher: processes the spec, emits close, writes a new version of
+  the file, then asserts that no rerun event fires within a build-sized window —
+  confirming the watcher is stopped and no rebuild is triggered
 
 ### Changed
 
@@ -28,13 +36,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   dual-package build strategy is reworked before TypeScript 7
 - CI `push` trigger scoped to `main` branch only, eliminating redundant
   double-triggering when pushing commits to a PR branch
-
-### Tests
-
-- Unit test asserting that two preprocessors with different `projectRoot` values
-  but the same spec path relative to their respective roots produce an identical
-  block shuffle for a given seed — directly verifying the `relativeFilePath`
-  PRNG seeding behavior introduced in 0.1.0-beta.2
 
 
 ## [0.1.0-beta.2] - 2026-04-26
