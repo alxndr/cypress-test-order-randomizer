@@ -59,39 +59,49 @@ test/
 
 ## Maintainer: cutting a release
 
-1. **Bump the version** in `package.json`. Follow [Semantic Versioning](https://semver.org).
-   Use a prerelease identifier for releases that aren't ready for general use
-   (e.g. `0.2.0-beta.1`).
+Releases are published locally. Before any publish, verify your environment:
 
-2. **Update `CHANGELOG.md`** — create a fresh empty `[Unreleased]` section above
-   the existing one, and rename the existing one to today's date plus the new
-   version string linked up to a diff between the prior version and this version
-   (e.g. `[0.2.0-beta.1] - 2026-05-01`).
+```sh
+npm whoami       # must return your npm username
+npm get registry # must return https://registry.npmjs.org/
+```
 
-3. **Merge to `main`.**
+Then run the full validation suite:
 
-4. **Tag the release and push the tag** — the tag is needed for the CHANGELOG
-   comparison links to resolve on GitHub, and creates a permanent marker in
-   git history. The tag does _not_ trigger publishing (that's a separate step).
-   ```sh
-   git tag v0.2.0-beta.1
-   git push origin v0.2.0-beta.1
-   ```
+```sh
+npm run validate
+```
 
-5. **Trigger the publish workflow** from the GitHub Actions UI (Actions →
-   Publish → Run workflow). The workflow must be run from the `main` branch.
-   It will lint, typecheck, unit-test, and build before publishing.
+### Prerelease (e.g. `0.2.0-beta.1`)
 
-   The dist-tag is inferred automatically from the version string:
-   - `0.2.0-beta.1` → published as `--tag beta` (users need `npm install cypress-test-order-randomizer@beta`)
-   - `1.0.0` → published as `--tag latest` (default for plain `npm install`)
+- [ ] Bump the version in `package.json` (follow [Semantic Versioning](https://semver.org);
+  use a prerelease identifier for releases not ready for general use)
+- [ ] Update `CHANGELOG.md`:
+  - Rename `[Unreleased]` to `[0.2.0-beta.1] - YYYY-MM-DD`
+  - Add a fresh empty `[Unreleased]` section above it
+  - Update the comparison links at the bottom of the file
+- [ ] Commit the version bump: `git commit -am "ops: bump prerelease version 0.2.0-beta.1"`
+- [ ] Merge to `main`
+- [ ] Tag and push:
+  ```sh
+  git tag v0.2.0-beta.1
+  git push origin v0.2.0-beta.1
+  ```
+- [ ] Publish:
+  ```sh
+  npm publish --tag beta
+  ```
+  `prepublishOnly` runs some checks and then `npm run build && npm pack --dry-run` automatically.
+- [ ] Verify: `npm info cypress-test-order-randomizer` should show the new
+  version under the `beta` dist-tag
 
-   The workflow requires an `NPM_TOKEN` secret to be configured in the
-   repository settings (Settings → Secrets → Actions).
+Users install a prerelease with e.g.: `npm install cypress-test-order-randomizer@beta`
 
-6. **Verify the registry** before triggering if doing a manual publish outside
-   the workflow. If your local npm config points at a private or corporate
-   registry, `npm publish` will go there instead of the public registry.
-   Check with `npm get registry` — it should return `https://registry.npmjs.org/`.
-   The GitHub Actions workflow is not affected by this (its registry is set
-   explicitly via `setup-node`'s `registry-url`).
+### Stable release (e.g. `1.0.0`)
+
+Follow the same checklist as a prerelease, with these differences:
+
+- Omit `--tag prereleaseName` when publishing — `latest` is the default and is what plain `npm install` resolves to
+- Verify the `latest` dist-tag updated in `npm info cypress-test-order-randomizer`
+
+Users install the latest stable release with: `npm install cypress-test-order-randomizer`
