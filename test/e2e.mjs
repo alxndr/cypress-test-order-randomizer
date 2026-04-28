@@ -286,6 +286,55 @@ check('suite-d (tsx): skipped tests do not appear in failing results', () => {
   assert.ok(!resultNoBlocks.failing.includes('suite-d inner-d-skipped D5'), 'D5 (describe.skip) must not fail')
 })
 
+// -- suite-d: nested block shuffling (randomizeBlocks=true) ------------------
+// The checks above use resultNoBlocks to test skip behaviour in isolation.
+// These checks use orderSeed42a (randomizeBlocks=true) to verify that the
+// nested describe structure inside suite-d is actually shuffled.
+
+check('randomizeBlocks=true: all non-skipped suite-d tests are present', () => {
+  const expectedTitles = [
+    'suite-d D1',
+    'suite-d D3',
+    'suite-d inner-d-running D6',
+    'suite-d inner-d-running inner-d-running nested D7',
+    'suite-d inner-d-running inner-d-running nested D8',
+    'suite-d inner-d-running D9',
+    'suite-d D10',
+  ]
+  for (const title of expectedTitles) {
+    assert.ok(orderSeed42a.includes(title), `${title} must appear in results`)
+  }
+})
+
+check('randomizeBlocks=true: suite-d top-level blocks are shuffled from declaration order', () => {
+  // 6 shufflable top-level blocks (including skipped): D1, D2, D3, inner-d-skipped, inner-d-running, D10
+  // 6! = 720 permutations; negligible (~0.14%) chance seed=42 preserves declaration order
+  const suiteDTitles   = orderSeed42a.filter(t => t.startsWith('suite-d '))
+  const posD1           = suiteDTitles.findIndex(t => t === 'suite-d D1')
+  const posD3           = suiteDTitles.findIndex(t => t === 'suite-d D3')
+  const posInnerRunning = suiteDTitles.findIndex(t => t.startsWith('suite-d inner-d-running '))
+  const posD10          = suiteDTitles.findIndex(t => t === 'suite-d D10')
+  // Declaration order would be: D1 < D3 < inner-d-running < D10
+  assert.ok(
+    !(posD1 < posD3 && posD3 < posInnerRunning && posInnerRunning < posD10),
+    'expected suite-d top-level blocks to be shuffled out of declaration order',
+  )
+})
+
+check('randomizeBlocks=true: suite-d inner-d-running blocks are shuffled from declaration order', () => {
+  // 3 shufflable blocks inside inner-d-running: D6, [inner-d-running nested: D7/D8], D9
+  // 3! = 6 permutations; ~17% chance seed=42 preserves order (same risk as existing C10/C11/C12 check)
+  const innerTitles = orderSeed42a.filter(t => t.startsWith('suite-d inner-d-running '))
+  const posD6       = innerTitles.findIndex(t => t === 'suite-d inner-d-running D6')
+  const posNested   = innerTitles.findIndex(t => t.startsWith('suite-d inner-d-running inner-d-running nested '))
+  const posD9       = innerTitles.findIndex(t => t === 'suite-d inner-d-running D9')
+  // Declaration order would be: D6 < nested group first test < D9
+  assert.ok(
+    !(posD6 < posNested && posNested < posD9),
+    'expected inner-d-running blocks to be shuffled out of declaration order',
+  )
+})
+
 // -- randomizeFiles=false ----------------------------------------------------
 
 check('randomizeFiles=false: all suite-a tests run before suite-b', () => {
