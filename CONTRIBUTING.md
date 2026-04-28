@@ -51,8 +51,8 @@ test/
 ## Submitting a PR
 
 1. Branch off `main`.
-2. Run `npm run validate` locally before pushing — CI runs the same checks and
-   will block the PR if they fail.
+2. Run `npm run validate` and `npm run test:e2e` locally before pushing — CI
+   runs the same checks and will block the PR if they fail.
 3. CI runs the `validate` job across a matrix of Node.js versions, then the
    `e2e` job on a single version once `validate` passes.
 

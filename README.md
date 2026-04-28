@@ -97,6 +97,8 @@ return definePlugin(on, config, { seed: 'a8f3c2d1b4e7' })
 
 Every subsequent run now uses that exact shuffle until you remove or change the `seed` option.
 
+Note that if you are using something like cy-grep which adjust whether a given test is run or not, those settings may also need to be provided along with the seed to recreate a given scenario.
+
 
 ### Stable-but-rotating seeds for CI
 
