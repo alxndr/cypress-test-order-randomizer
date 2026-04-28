@@ -48,6 +48,8 @@ export default defineConfig({
 
 Both spec-file order and block order are randomized by default.
 
+Note that using Cypress's `--spec` flag will cause the randomized order to be bypassed. To shuffle a selection of spec files, try using `--config specPattern="path/pattern/here/*"` instead.
+
 
 ## Options
 
