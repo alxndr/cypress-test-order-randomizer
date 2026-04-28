@@ -2,7 +2,7 @@
 
 This [Cypress](https://cypress.io) v15 plugin randomizes the execution order of your test suite.
 
-It allows for independently shuffling the order in which test files are run, and the order of the `describe`/`it`/`test` blocks within them. The seed value printed at the start of each run (or provided via config) makes any shuffle exactly reproducible.
+It allows for independently shuffling the order in which test files are run, and the order of the `describe`/`it`/`test` blocks within them. The seed value printed at the start/end of each run identifies the shuffled order, and providing it when running on the same set of input tests should reproduce the same order of test execution.
 
 Much of this code was written by Claude Code, with human supervision.
 
@@ -11,7 +11,7 @@ Much of this code was written by Claude Code, with human supervision.
 
 Predictably randomizing the order of your tests can expose unintentional execution-ordering dependencies between tests. Using a seed value for the ordering means that we can reliably recreate a given ordering once it's been generated.
 
-In sum, it contributes to making test suites more robust.
+TLDR: it can help make test suites more robust.
 
 
 ## Installation
@@ -35,23 +35,37 @@ npm install --save-dev esbuild
 ```typescript
 // cypress.config.ts
 import { defineConfig } from 'cypress'
-import { definePlugin } from 'cypress-test-order-randomizer'
+import { definePlugin as definePluginTestRandomizer } from 'cypress-test-order-randomizer'
 
 export default defineConfig({
   e2e: {
     async setupNodeEvents(on, config) {
-      return definePlugin(on, config)
+      return definePluginTestRandomizer(on, config)
     },
   },
 })
 ```
 
-That's it. Both spec-file order and block order are randomized by default.
+Both spec-file order and block order are randomized by default.
 
 
 ## Options
 
-```typescript
+| Option            | Type      | Default | Description                                 |
+|-------------------|-----------|---------|---------------------------------------------|
+| `randomizeFiles`  | `boolean` | `true`  | Randomize the order spec files are executed |
+| `randomizeBlocks` | `boolean` | `true`  | Randomize `describe`/`it`/`test`/`context` blocks within each spec |
+| `seed`            | `string`  | randomly-generated | Seed for the random number generator |
+
+CLI:
+
+```shell
+$ npx cypress run -- --env seed=1234567
+```
+
+JS API:
+
+```javascript
 definePlugin(on, config, {
   randomizeFiles:  true,      // shuffle spec files  (default: true)
   randomizeBlocks: true,      // shuffle describe/it blocks within each spec (default: true)
@@ -59,32 +73,19 @@ definePlugin(on, config, {
 })
 ```
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `randomizeFiles` | `boolean` | `true` | Randomize the order spec files are executed |
-| `randomizeBlocks` | `boolean` | `true` | Randomize `describe`/`it`/`test`/`context` blocks within each spec |
-| `seed` | `string \| number` | auto | Seed for the random number generator — see below |
-
-> **Note on file ordering.** Cypress does not guarantee spec execution order
-> when `specPattern` is an array (open issues
-> [#31758](https://github.com/cypress-io/cypress/issues/31758),
-> [#29067](https://github.com/cypress-io/cypress/issues/29067)).
-> File shuffling is best-effort via `config.specPattern`.
-
 
 ## Seeds & Reproducibility
 
 ### Default behaviour — every run is different
 
-When you don't provide a `seed`, the plugin generates a random one at the start
-of each run and **prints it to the console**:
+When you don't provide a `seed`, the plugin generates a random one at the start of each run and prints it to the console:
 
 ```
 [cypress-test-order-randomizer] Seed: a8f3c2d1b4e7
 ```
 
-Every run has a different order. That's the point — a test that only fails in a
-specific order is a test with a hidden dependency on another test.
+The tests are run in a shuffled order, and the order corresponds to the seed. The order of the tests can be recreated in later runs of the same tests by providing the same seed value.
+
 
 ### Reproducing a specific run
 
@@ -94,13 +95,12 @@ When a failure surfaces, copy the seed from the console and pass it back:
 return definePlugin(on, config, { seed: 'a8f3c2d1b4e7' })
 ```
 
-Every subsequent run now uses that exact shuffle until you remove or change the
-`seed` option.
+Every subsequent run now uses that exact shuffle until you remove or change the `seed` option.
+
 
 ### Stable-but-rotating seeds for CI
 
-If you want runs to be reproducible within a build but still rotate between
-builds, tie the seed to the build identifier:
+If you want runs to be reproducible within a build but still rotate between builds, tie the seed to the build identifier:
 
 ```typescript
 return definePlugin(on, config, {
@@ -108,10 +108,6 @@ return definePlugin(on, config, {
 })
 ```
 
-### String vs number seeds
-
-Seeds can be a `string` or a `number`. Numbers are stringified internally, so
-`42` and `'42'` produce **identical** shuffles.
 
 ### How a single seed controls both file order and block order
 
@@ -122,9 +118,8 @@ The global `seed` drives two independent shuffles:
 | File order | `seed` directly | One shuffle of the full spec list |
 | Block order (per spec) | `${seed}:${relativeFilePath}` | One shuffle per spec file, path is relative to project root so the seed is identical across environments |
 
-Because block-level seeds include the file path, two spec files always receive
-**different** block shuffles from the same global seed — and those shuffles are
-stable and independent of how many files you have or what order they ran in.
+Because block-level seeds include the file path, two spec files always receive *different* block shuffles from the same global seed — and those shuffles are stable and independent of how many files you have or what order they ran in.
+
 
 ### Disabling randomization without removing the plugin
 
@@ -135,8 +130,7 @@ return definePlugin(on, config, {
 })
 ```
 
-Useful for temporarily debugging an ordering issue without touching
-`cypress.config.ts` beyond one flag.
+Useful for temporarily debugging an ordering issue without touching `cypress.config.ts` beyond one flag.
 
 
 ## How it works
@@ -147,7 +141,7 @@ Useful for temporarily debugging an ordering issue without touching
    array before returning.
 
 2. **Block order** — A custom [esbuild](https://esbuild.github.io/) preprocessor
-   intercepts each spec file before it reaches the browser. It parses the source
+   intercepts each spec file before Cypress's test runner loads it. It parses the source
    with [`@babel/parser`](https://babeljs.io/docs/babel-parser), shuffles
    `describe`/`context`/`it`/`test`/`specify` blocks (and `.only`/`.skip`
    variants) at every nesting level while leaving hooks (`beforeEach`,
