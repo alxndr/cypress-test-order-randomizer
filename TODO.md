@@ -2,10 +2,14 @@
 
 There may also be `TODO` strings in the app/test code or comments; ideally they should be migrated into this file to avoid being unintentionally ignored.
 
+## feature / API ideas
 
-## handle CLI use of `--spec`
+It would be nice to be able to union / merge the CLI `--env` values with npm script aliases... e.g. the `cy-grep` issue
 
-Debugging unusual behavior when using this plugin with a `--spec` glob; the shuffled order wasn't being seen...
+
+### how to work with CLI use of `--spec`?
+
+Debugging unusual behavior when using this plugin with a `--spec` glob; the shuffled order wasn't being seen. Turns out it uses a different code path within Cypress; suggested fix is to change how you're calling Cypress to use `--config specPattern=your/glob/here*` ...
 
 ```
 ⏺ Looking at the admin run's `test:e2e:admin` script: it uses `--spec cypress/e2e/admin/*`. That's
@@ -32,4 +36,4 @@ Debugging unusual behavior when using this plugin with a `--spec` glob; the shuf
   This is also worth a note in the plugin README — `--spec` is a known bypass.
 ```
 
-The suggested way to address above is for the integrating developer to modify their process. If we can avoid that and instead support the use of `--spec` that would be ideal.
+It would be more user-friendly if we didn't require users to modify their current task definitions ...

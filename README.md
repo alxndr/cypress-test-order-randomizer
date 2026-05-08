@@ -46,9 +46,13 @@ export default defineConfig({
 })
 ```
 
+```shell
+$ npx cypress run -- --env seed=1234567,randomizeFiles=false
+```
+
 Both spec-file order and block order are randomized by default.
 
-Note that using Cypress's `--spec` flag will cause the randomized order to be bypassed. To shuffle a selection of spec files, try using `--config specPattern="path/pattern/here/*"` instead.
+Note that using Cypress's `--spec` flag will cause the **randomized file order to be bypassed**. To shuffle a selection of spec files, try using `--config specPattern="path/pattern/here/*"` instead.
 
 
 ## Options
@@ -59,21 +63,15 @@ Note that using Cypress's `--spec` flag will cause the randomized order to be by
 | `randomizeBlocks` | `boolean` | `true`  | Randomize `describe`/`it`/`test`/`context` blocks within each spec |
 | `seed`            | `string`  | randomly-generated | Seed for the random number generator |
 
-JS API (e.g. in `cypress.config.js`):
-
 ```javascript
 definePlugin(on, config, {
   randomizeFiles:  true,      // shuffle spec files  (default: true)
   randomizeBlocks: true,      // shuffle describe/it blocks within each spec (default: true)
-  seed:            undefined, // string | number — see Seeds section below
+  seed:            undefined, // string | number — see Seeds * Reproducibility section below
 })
 ```
 
-CLI:
 
-```shell
-$ npx cypress run -- --env seed=1234567,randomizeFiles=false
-```
 
 
 ## Seeds & Reproducibility
@@ -143,6 +141,22 @@ Useful for temporarily debugging an ordering issue without touching `cypress.con
    [`fast-glob`](https://github.com/mrmlnc/fast-glob), shuffles the resulting
    list using a seeded PRNG, and replaces `config.specPattern` with the ordered
    array before returning.
+
+   > **`--spec` bypasses file-order shuffling.** When Cypress receives a `--spec`
+   > argument on the command line, it resolves and runs those files directly,
+   > ignoring `config.specPattern` entirely — so the plugin's shuffle never takes
+   > effect. Block-order randomization (`randomizeBlocks`) still works regardless.
+   >
+   > If you want file-order shuffling when targeting a subset of specs, use
+   > `--config specPattern=` instead:
+   >
+   > ```sh
+   > # bypasses shuffle ✗
+   > npx cypress run --spec "cypress/e2e/admin/*"
+   >
+   > # shuffles correctly ✓
+   > npx cypress run --config specPattern="cypress/e2e/admin/*"
+   > ```
 
 2. **Block order** — A custom [esbuild](https://esbuild.github.io/) preprocessor
    intercepts each spec file before Cypress's test runner loads it. It parses the source
