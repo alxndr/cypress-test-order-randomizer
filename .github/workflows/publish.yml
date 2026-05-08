@@ -12,10 +12,10 @@ jobs:
     # only main can actually publish.
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       # registry-url is required for NODE_AUTH_TOKEN to be picked up by npm.
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: '22'
           check-latest: true
