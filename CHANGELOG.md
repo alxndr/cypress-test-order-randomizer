@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+(Nothing yet...)
+
+
+## [1.0.0] - 2026-05-08
+
 ### Changed
 
 - README documents that Cypress's `--spec` flag bypasses `randomizeFiles`
@@ -138,7 +143,8 @@ Initial implementation.
   those pass, on a single Node.js version
 
 
-[Unreleased]: https://github.com/alxndr/cypress-test-order-randomizer/compare/v0.1.0-beta.3...HEAD
+[Unreleased]: https://github.com/alxndr/cypress-test-order-randomizer/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/alxndr/cypress-test-order-randomizer/compare/v0.1.0-beta.3...1.0.0
 [0.1.0-beta.3]: https://github.com/alxndr/cypress-test-order-randomizer/compare/v0.1.0-beta.2...v0.1.0-beta.3
 [0.1.0-beta.2]: https://github.com/alxndr/cypress-test-order-randomizer/compare/v0.1.0-beta.1...v0.1.0-beta.2
 [0.1.0-beta.1]: https://github.com/alxndr/cypress-test-order-randomizer/compare/v0.1.0-alpha.2...v0.1.0-beta.1

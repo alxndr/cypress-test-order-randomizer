@@ -1,6 +1,6 @@
 {
   "name": "cypress-test-order-randomizer",
-  "version": "0.1.0-beta.3",
+  "version": "1.0.0",
   "description": "Cypress plugin which randomizes the order in which tests are run",
   "scripts": {
     "build": "tsc -p tsconfig.build.json && tsc -p tsconfig.build.cjs.json && node --input-type=commonjs -e 'require(`node:fs`).writeFileSync(`dist/cjs/package.json`, JSON.stringify({type:`commonjs`}))'",
