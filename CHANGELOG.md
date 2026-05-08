@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (file-order shuffle), while `randomizeBlocks` continues to work; includes a
   workaround using `--config specPattern=` instead
 - Upgraded dev dependencies: Cypress, OXLint, esbuild (no consumer impact)
+- CI uses newer versions of the GitHub Actions packages
 
 ### Removed
 
