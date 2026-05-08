@@ -137,7 +137,7 @@ Initial implementation.
   those pass, on a single Node.js version
 
 
-[Unreleased]: https://github.com/alxndr/cypress-test-order-randomizer/compare/v0.1.0-beta.2...HEAD
+[Unreleased]: https://github.com/alxndr/cypress-test-order-randomizer/compare/v0.1.0-beta.3...HEAD
 [0.1.0-beta.3]: https://github.com/alxndr/cypress-test-order-randomizer/compare/v0.1.0-beta.2...v0.1.0-beta.3
 [0.1.0-beta.2]: https://github.com/alxndr/cypress-test-order-randomizer/compare/v0.1.0-beta.1...v0.1.0-beta.2
 [0.1.0-beta.1]: https://github.com/alxndr/cypress-test-order-randomizer/compare/v0.1.0-alpha.2...v0.1.0-beta.1
