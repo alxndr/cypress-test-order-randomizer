@@ -38,8 +38,7 @@
   "homepage": "https://github.com/alxndr/cypress-test-order-randomizer#readme",
   "license": "MIT",
   "engines": {
-    "node": ">=22.0.0",
-    "npm": ">=11.10.0"
+    "node": ">=22.0.0"
   },
   "peerDependencies": {
     "cypress": ">=15.0.0",
