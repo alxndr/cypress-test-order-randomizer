@@ -2,10 +2,8 @@ import { randomBytes } from 'node:crypto'
 import { resolveSpecFiles, randomizeSpecOrder } from './file-randomizer.js'
 import { createPrng } from './seeded-random.js'
 import { createPreprocessor } from './preprocessor.js'
-import type { CypressPreprocessorFile } from './preprocessor.js'
 
 export { transformCode } from './block-randomizer.js'
-export type { CypressPreprocessorFile, PreprocessorOptions } from './preprocessor.js'
 
 export interface PluginOptions {
   /**
