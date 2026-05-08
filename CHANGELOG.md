@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- README documents that Cypress's `--spec` flag bypasses `randomizeFiles`
+  (file-order shuffle), while `randomizeBlocks` continues to work; includes a
+  workaround using `--config specPattern=` instead
+- Upgraded dev dependencies: Cypress, OXLint, esbuild (no consumer impact)
+
+### Removed
+
+- The preprocessor-internal types `CypressPreprocessorFile` and
+  `PreprocessorOptions` are no longer exported by the final build [2f710aed]
+
+
 ## [0.1.0-beta.3] - 2026-04-27
 
 ### Added
