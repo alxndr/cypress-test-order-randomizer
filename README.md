@@ -59,13 +59,7 @@ Note that using Cypress's `--spec` flag will cause the randomized order to be by
 | `randomizeBlocks` | `boolean` | `true`  | Randomize `describe`/`it`/`test`/`context` blocks within each spec |
 | `seed`            | `string`  | randomly-generated | Seed for the random number generator |
 
-CLI:
-
-```shell
-$ npx cypress run -- --env seed=1234567
-```
-
-JS API:
+JS API (e.g. in `cypress.config.js`):
 
 ```javascript
 definePlugin(on, config, {
@@ -73,6 +67,12 @@ definePlugin(on, config, {
   randomizeBlocks: true,      // shuffle describe/it blocks within each spec (default: true)
   seed:            undefined, // string | number — see Seeds section below
 })
+```
+
+CLI:
+
+```shell
+$ npx cypress run -- --env seed=1234567,randomizeFiles=false
 ```
 
 
