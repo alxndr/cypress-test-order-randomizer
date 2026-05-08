@@ -167,7 +167,7 @@ Useful for temporarily debugging an ordering issue without touching `cypress.con
    regenerates the source and hands it to esbuild for bundling.
 
 3. **Reproducibility** — The PRNG is a counter-mode SHA-256 construction built
-   on Node.js's built-in `crypto` module. No hand-rolled math.
+   on Node.js's built-in `crypto` module. No hand-rolled PRNG math.
 
 
 ## Contributing
