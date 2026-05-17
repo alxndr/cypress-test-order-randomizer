@@ -60,7 +60,7 @@
     "esbuild": "^0.28.0",
     "oxlint": "^1.63.0",
     "typescript": "^6.0.0",
-    "vitest": "^2.0.0"
+    "vitest": "^3.2.4"
   },
   "type": "module",
   "files": ["dist", "README.md", "LICENSE"],
