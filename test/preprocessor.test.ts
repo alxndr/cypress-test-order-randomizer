@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { EventEmitter } from 'node:events'
-import { mkdtemp, mkdir, rm, writeFile, readFile } from 'node:fs/promises'
+import { mkdtemp, mkdir, rm, writeFile, readFile, symlink } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { createPreprocessor } from '../src/preprocessor.js'
@@ -315,6 +315,44 @@ describe('createPreprocessor', () => {
     } finally {
       await rm(rootA, { recursive: true })
       await rm(rootB, { recursive: true })
+    }
+  })
+
+  it('handles spec files accessed through symlinked paths', async () => {
+    const realDir = await mkdtemp(join(tmpdir(), 'ctr-real-'))
+    const symlinkDir = join(tempDir, 'symlink-to-real')
+    
+    try {
+      await symlink(realDir, symlinkDir, 'dir')
+      
+      const specContent = `
+        describe('symlink suite', () => {
+          it('test A', () => {})
+          it('test B', () => {})
+          it('test C', () => {})
+        })
+      `
+      
+      const symlinkSpecPath = join(symlinkDir, 'symlinked.cy.ts')
+      const outputPath = join(tempDir, 'symlinked-output.cy.js')
+      
+      await writeFile(symlinkSpecPath, specContent)
+      
+      const handler = createPreprocessor({ 
+        seed: 42, 
+        randomizeBlocks: true, 
+        projectRoot: tempDir 
+      })
+      
+      await handler(createMockFile(symlinkSpecPath, outputPath))
+      
+      const output = await readFile(outputPath, 'utf-8')
+      expect(output).toContain('symlink suite')
+      expect(output).toContain('test A')
+      expect(output).toContain('test B')
+      expect(output).toContain('test C')
+    } finally {
+      await rm(realDir, { recursive: true, force: true })
     }
   })
 })

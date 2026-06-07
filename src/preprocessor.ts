@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises'
+import { readFile, realpath } from 'node:fs/promises'
 import { watch } from 'node:fs'
 import type { FSWatcher } from 'node:fs'
 import * as nodePath from 'node:path'
@@ -27,16 +27,17 @@ function inferLoader(filePath: string): esbuild.Loader {
   return 'js'
 }
 
-function createTransformPlugin(
+async function createTransformPlugin(
   targetFilePath: string,
   randomFn: (() => number) | null
-): esbuild.Plugin {
+): Promise<esbuild.Plugin> {
+  const resolvedTargetPath = await realpath(targetFilePath)
   return {
     name: 'cypress-test-order-randomizer',
     setup(build) {
       // Only intercept the spec entry point — let esbuild handle all imports normally
       build.onLoad({ filter: /.*/, namespace: 'file' }, async (args) => {
-        if (args.path !== targetFilePath) return
+        if (args.path !== resolvedTargetPath) return
         const source = await readFile(args.path, 'utf-8')
         const contents = randomFn !== null ? transformCode(source, randomFn) : source
         return { contents, loader: inferLoader(args.path) }
@@ -48,7 +49,7 @@ function createTransformPlugin(
 async function buildSpec(
   filePath: string,
   outputPath: string,
-  plugin: esbuild.Plugin
+  plugin: Promise<esbuild.Plugin>
 ): Promise<void> {
   await esbuild.build({
     entryPoints: [filePath],
@@ -56,7 +57,7 @@ async function buildSpec(
     outfile: outputPath,
     platform: 'browser',
     format: 'iife',
-    plugins: [plugin],
+    plugins: [await plugin],
     logLevel: 'silent',
   })
 }
