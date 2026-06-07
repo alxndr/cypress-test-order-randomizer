@@ -27,7 +27,7 @@ describe('definePlugin', () => {
     on = vi.fn<(event: string, handler: unknown) => void>()
     // Suppress stdout for all tests to prevent seed lines from bleeding into
     // concurrent test output from other files
-    stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true)
+    stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true) as any
   })
 
   afterEach(() => {

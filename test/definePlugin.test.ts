@@ -54,7 +54,7 @@ describe('definePlugin', () => {
 
   beforeEach(async () => {
     tempDir = await mkdtemp(join(tmpdir(), 'cypress-test-order-randomizer-test'))
-    stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true)
+    stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true) as any
   })
 
   afterEach(async () => {
