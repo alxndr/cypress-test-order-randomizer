@@ -1,6 +1,6 @@
 # cypress-test-order-randomizer
 
-This [Cypress](https://cypress.io) v15 plugin randomizes the execution order of your test suite.
+This [Cypress](https://cypress.io) v14+ plugin randomizes the execution order of your test suite.
 
 It allows for independently shuffling the order in which test files are run, and the order of the `describe`/`it`/`test` blocks within them. The seed value printed at the start/end of each run identifies the shuffled order, and providing it when running on the same set of input tests should reproduce the same order of test execution.
 

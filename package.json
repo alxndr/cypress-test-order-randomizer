@@ -11,7 +11,7 @@
     "pretest": "echo '\\nTesting...'",
     "test": "npm run test:unit && npm run test:e2e",
     "posttest": "echo '\\nTesting succeeded!'",
-    "test:e2e": "npm run build && node test/e2e.mjs",
+    "test:e2e": "npm run build && node test/e2e.mjs && node test/e2e.mjs --major-version 14",
     "test:unit": "vitest run",
     "test:watch": "vitest",
     "pretypecheck": "echo '\\nTypechecking...'",
@@ -33,7 +33,10 @@
     "url": "git+https://github.com/alxndr/cypress-test-order-randomizer.git"
   },
   "author": "@alxndr",
-  "contributors": ["@alxndr", "Claude Code"],
+  "contributors": [
+    "@alxndr",
+    "Claude Code"
+  ],
   "bugs": "https://github.com/alxndr/cypress-test-order-randomizer/issues",
   "homepage": "https://github.com/alxndr/cypress-test-order-randomizer#readme",
   "license": "MIT",
@@ -41,7 +44,7 @@
     "node": ">=22.0.0"
   },
   "peerDependencies": {
-    "cypress": ">=15.0.0",
+    "cypress": ">=14.0.0",
     "esbuild": ">=0.17.0"
   },
   "peerDependenciesMeta": {
@@ -56,14 +59,18 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
-    "cypress": "^15.14.2",
+    "cypress": "^15.16.0",
     "esbuild": "^0.28.0",
     "oxlint": "^1.63.0",
     "typescript": "^6.0.0",
     "vitest": "^3.2.4"
   },
   "type": "module",
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "main": "dist/cjs/index.js",
   "types": "dist/index.d.ts",
   "exports": {

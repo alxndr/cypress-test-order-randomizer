@@ -13,7 +13,7 @@
  * run captures its auto-generated seed from stdout, then a second run uses
  * that seed to verify the order is exactly reproduced.
  *
- * Usage: node test/e2e.mjs   (or via `npm run test:e2e`)
+ * Usage: node test/e2e.mjs [--major-version 14]
  */
 
 import assert from 'node:assert/strict'
@@ -23,7 +23,27 @@ import { fileURLToPath } from 'node:url'
 
 const projectRoot = fileURLToPath(new URL('..', import.meta.url))
 const fixturesDir = join(projectRoot, 'test', 'fixtures')
-const cypressBin  = join(projectRoot, 'node_modules', '.bin', 'cypress')
+
+const cliArgs = process.argv.slice(2)
+const majorVersionIndex = cliArgs.indexOf('--major-version')
+const majorVersion = majorVersionIndex !== -1 ? cliArgs[majorVersionIndex + 1] : null
+
+let cypressBin = join(projectRoot, 'node_modules', '.bin', 'cypress')
+
+if (majorVersion === '14') {
+  console.log('Installing Cypress 14.5.4 for testing...')
+  const installResult = spawnSync(
+    'npm',
+    ['install', '--no-save', 'cypress@14.5.4'],
+    { encoding: 'utf-8', cwd: projectRoot, timeout: 300_000 }
+  )
+  if (installResult.error || installResult.status !== 0) {
+    console.error('Failed to install Cypress 14.5.4')
+    console.error(installResult.stderr)
+    process.exit(1)
+  }
+  console.log('Cypress 14.5.4 installed successfully\n')
+}
 
 // ---------------------------------------------------------------------------
 // Helper
