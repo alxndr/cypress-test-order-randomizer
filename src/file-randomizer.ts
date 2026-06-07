@@ -1,4 +1,4 @@
-import { glob } from 'fast-glob'
+import glob from 'fast-glob'
 import { shuffleArray } from './seeded-random.js'
 
 /**

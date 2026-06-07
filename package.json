@@ -11,7 +11,7 @@
     "pretest": "echo '\\nTesting...'",
     "test": "npm run test:unit && npm run test:e2e",
     "posttest": "echo '\\nTesting succeeded!'",
-    "test:e2e": "npm run build && node test/e2e.mjs",
+    "test:e2e": "npm run build && node test/e2e.mjs && node test/e2e.mjs --major-version=14 && node test/e2e.mjs --major-version=13 && node test/e2e.mjs --major-version=12",
     "test:unit": "vitest run",
     "test:watch": "vitest",
     "pretypecheck": "echo '\\nTypechecking...'",
@@ -41,7 +41,7 @@
     "node": ">=22.0.0"
   },
   "peerDependencies": {
-    "cypress": ">=15.0.0",
+    "cypress": ">=12.0.0",
     "esbuild": ">=0.17.0"
   },
   "peerDependenciesMeta": {

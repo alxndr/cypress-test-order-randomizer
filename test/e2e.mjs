@@ -13,10 +13,12 @@
  * run captures its auto-generated seed from stdout, then a second run uses
  * that seed to verify the order is exactly reproduced.
  *
- * Usage: node test/e2e.mjs   (or via `npm run test:e2e`)
+ * Usage: node test/e2e.mjs [--major-version=<12|13|14|15>]
+ *   or via `npm run test:e2e`
  */
 
 import assert from 'node:assert/strict'
+import { writeFileSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -24,6 +26,64 @@ import { fileURLToPath } from 'node:url'
 const projectRoot = fileURLToPath(new URL('..', import.meta.url))
 const fixturesDir = join(projectRoot, 'test', 'fixtures')
 const cypressBin  = join(projectRoot, 'node_modules', '.bin', 'cypress')
+const fixturesTsconfig = join(fixturesDir, 'tsconfig.json')
+
+const CYPRESS_VERSIONS = {
+  '12': '12.17.4',
+  '13': '13.17.0',
+  '14': '14.5.4',
+  '15': null,
+}
+
+let majorVersion = '15'
+for (const arg of process.argv.slice(2)) {
+  const match = arg.match(/^--major-version=?(\d+)$/)
+  if (match) {
+    majorVersion = match[1]
+    if (!CYPRESS_VERSIONS[majorVersion]) {
+      console.error(`Invalid major version: ${majorVersion}. Must be 12, 13, 14, or 15.`)
+      process.exit(1)
+    }
+  }
+}
+
+const targetVersion = CYPRESS_VERSIONS[majorVersion]
+if (targetVersion) {
+  console.log(`Installing Cypress ${targetVersion}...`)
+  const installResult = spawnSync(
+    'npm',
+    ['install', '--no-save', `cypress@${targetVersion}`],
+    { encoding: 'utf-8', cwd: projectRoot, stdio: 'inherit' },
+  )
+  if (installResult.error || installResult.status !== 0) {
+    console.error(`Failed to install Cypress ${targetVersion}`)
+    process.exit(1)
+  }
+  console.log(`Using Cypress ${targetVersion}\n`)
+} else {
+  console.log(`Using Cypress version from package.json\n`)
+}
+
+const tsconfigContent = majorVersion === '15'
+  ? JSON.stringify({
+      compilerOptions: {
+        target: 'ES2020',
+        lib: ['ES2020', 'DOM'],
+        types: ['cypress']
+      },
+      include: ['**/*.ts', '**/*.tsx']
+    }, null, 2)
+  : JSON.stringify({
+      compilerOptions: {
+        target: 'ES2020',
+        lib: ['ES2020', 'DOM'],
+        types: ['cypress'],
+        ignoreDeprecations: '6.0'
+      },
+      include: ['**/*.ts', '**/*.tsx']
+    }, null, 2)
+
+writeFileSync(fixturesTsconfig, tsconfigContent, 'utf-8')
 
 // ---------------------------------------------------------------------------
 // Helper
