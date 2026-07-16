@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Upgraded `esbuild`, `oxlint`, & `vitest`
+- Upgraded packages used in CI ([#12](https://github.com/alxndr/cypress-test-order-randomizer/pull/12))
+- Specify in `CONTRIBUTING.md` that tagging releases is required
+- Add a link to `CHANGELOG.md`
+
 
 ## [1.1.0] - 2026-07-15
 
