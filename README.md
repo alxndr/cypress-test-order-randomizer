@@ -138,9 +138,9 @@ Useful for temporarily debugging an ordering issue without touching `cypress.con
 ## How it works
 
 1. **File order** — `definePlugin` resolves your `specPattern` globs with
-   [`fast-glob`](https://github.com/mrmlnc/fast-glob), shuffles the resulting
-   list using a seeded PRNG, and replaces `config.specPattern` with the ordered
-   array before returning.
+   Node's built-in [`fs.promises.glob`](https://nodejs.org/api/fs.html#fspromisesglobpattern-options),
+   shuffles the resulting list using a seeded PRNG, and replaces
+   `config.specPattern` with the ordered array before returning.
 
    > **`--spec` bypasses file-order shuffling.** When Cypress receives a `--spec`
    > argument on the command line, it resolves and runs those files directly,

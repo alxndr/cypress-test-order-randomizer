@@ -3,13 +3,27 @@
     "target": "ES2023",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "lib": ["ES2023"],
+    // ESNext.Array is needed for Array.fromAsync (used to materialize
+    // node:fs/promises' async-iterable glob() results); target stays at
+    // ES2023 since fromAsync is a runtime API, not new syntax.
+    "lib": ["ES2023", "ESNext.Array"],
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "noEmit": true
+    "noEmit": true,
+    // Pinned explicitly rather than left to TypeScript's implicit
+    // "auto-include every @types/* package" behavior: that auto-inclusion
+    // turned out to be fragile — tsconfig.build.json (include: ["src"],
+    // excludes test/) silently dropped ALL @types/node ambient globals
+    // (process, node:fs, node:path, ...) across every src file, but only
+    // once src/file-randomizer.ts started importing from 'node:fs/promises'.
+    // Root cause wasn't pinned down (see commit message), but pinning
+    // "types" sidesteps the whole class of "which imports happen to
+    // trigger implicit inclusion" fragility. @types/node is the only
+    // @types/* package this project has, so this changes nothing else.
+    "types": ["node"]
   },
   "include": ["src", "test"],
   "exclude": ["node_modules", "dist", "test/fixtures"]

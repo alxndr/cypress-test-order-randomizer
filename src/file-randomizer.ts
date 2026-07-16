@@ -1,11 +1,5 @@
-// fast-glob is CJS-only and assigns its named exports (`glob`, `async`, etc.)
-// as properties on the default-exported function rather than via static
-// `exports.foo = …` assignments, so Node's ESM loader can't see them as named
-// exports — only the default import is reliably detected. Cypress <15.17 ran
-// config files through a bundler that papered over this; 15.17+ loads them
-// under stricter, closer-to-native ESM, so a named import here breaks plugin
-// consumers on newer Cypress versions.
-import fastGlob from 'fast-glob'
+import { glob } from 'node:fs/promises'
+import { resolve } from 'node:path'
 import { shuffleArray } from './seeded-random.js'
 
 /**
@@ -18,7 +12,9 @@ export async function resolveSpecFiles(
   cwd: string
 ): Promise<string[]> {
   const patterns = Array.isArray(specPattern) ? specPattern : [specPattern]
-  const files = await fastGlob(patterns, { cwd, absolute: true })
+  // node:fs/promises glob() yields paths relative to cwd, with no built-in
+  // "absolute" option — resolve them ourselves.
+  const files = await Array.fromAsync(glob(patterns, { cwd }), (file) => resolve(cwd, file))
   return files.toSorted()
 }
 

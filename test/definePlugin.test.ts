@@ -10,7 +10,7 @@
 //
 // What is real:
 //   - Temp directories and actual .cy.ts files on disk, because resolveSpecFiles
-//     uses fast-glob which reads the real filesystem
+//     uses node:fs/promises' glob() which reads the real filesystem
 //   - The seed/PRNG logic, which actually shuffles the file list
 //   - definePlugin itself, called exactly as user code would call it
 //
