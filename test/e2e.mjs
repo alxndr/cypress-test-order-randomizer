@@ -19,11 +19,38 @@
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
 import { join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const projectRoot = fileURLToPath(new URL('..', import.meta.url))
 const fixturesDir = join(projectRoot, 'test', 'fixtures')
 const cypressBin  = join(projectRoot, 'node_modules', '.bin', 'cypress')
+const distIndex   = join(projectRoot, 'dist', 'index.js')
+
+// ---------------------------------------------------------------------------
+// Pre-flight: the published ESM entrypoint must load under Node's native,
+// unbundled ESM loader.
+//
+// Cypress <15.17 ran config files (and everything they import, including this
+// plugin) through a bundler that synthesizes CJS named exports at runtime, so
+// mistakes like importing a named export off a CJS-only dependency were
+// silently papered over. Cypress 15.17+ loads them more strictly, which is
+// closer to plain `node --input-type=module`, so we check against that
+// directly rather than against Cypress's internal (and version-dependent)
+// loading behavior.
+// ---------------------------------------------------------------------------
+
+console.log('[0/9] Verifying dist/index.js loads under native Node ESM...')
+const preflight = spawnSync(
+  process.execPath,
+  ['--input-type=module', '-e', `import ${JSON.stringify(pathToFileURL(distIndex).href)}`],
+  { encoding: 'utf-8' },
+)
+if (preflight.status !== 0) {
+  console.error('  ✗  dist/index.js failed to load under native Node ESM')
+  console.error(preflight.stderr)
+  process.exit(1)
+}
+console.log('  ✓  dist/index.js loads under native Node ESM\n')
 
 // ---------------------------------------------------------------------------
 // Helper

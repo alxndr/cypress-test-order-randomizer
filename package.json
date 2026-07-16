@@ -1,6 +1,6 @@
 {
   "name": "cypress-test-order-randomizer",
-  "version": "1.0.0",
+  "version": "1.1.0-alpha",
   "description": "Cypress plugin which randomizes the order in which tests are run",
   "scripts": {
     "build": "tsc -p tsconfig.build.json && tsc -p tsconfig.build.cjs.json && node --input-type=commonjs -e 'require(`node:fs`).writeFileSync(`dist/cjs/package.json`, JSON.stringify({type:`commonjs`}))'",
@@ -33,7 +33,10 @@
     "url": "git+https://github.com/alxndr/cypress-test-order-randomizer.git"
   },
   "author": "@alxndr",
-  "contributors": ["@alxndr", "Claude Code"],
+  "contributors": [
+    "@alxndr",
+    "Claude Code"
+  ],
   "bugs": "https://github.com/alxndr/cypress-test-order-randomizer/issues",
   "homepage": "https://github.com/alxndr/cypress-test-order-randomizer#readme",
   "license": "MIT",
@@ -56,14 +59,18 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
-    "cypress": "^15.14.2",
+    "cypress": "^15.18.1",
     "esbuild": "^0.28.0",
     "oxlint": "^1.63.0",
     "typescript": "^6.0.0",
     "vitest": "^3.2.4"
   },
   "type": "module",
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "main": "dist/cjs/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -72,5 +79,11 @@
       "require": "./dist/cjs/index.js",
       "types": "./dist/index.d.ts"
     }
+  },
+  "allowScripts": {
+    "esbuild@0.28.0": true,
+    "esbuild@0.27.7": true,
+    "fsevents@2.3.3": true,
+    "cypress@15.18.1": true
   }
 }
