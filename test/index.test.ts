@@ -15,19 +15,23 @@ function createMockConfig(overrides: Partial<MockConfig> = {}): MockConfig {
   }
 }
 
+// process.stdout.write is overloaded, and vi.spyOn's key constraint excludes
+// overloaded methods from its generic type parameters — so instead of typing
+// the spy explicitly (which would require `any`), this wraps the untyped call
+// in a function and lets stdoutSpy's declared type below be inferred from it.
+function spyOnStdoutWrite() {
+  return vi.spyOn(process.stdout, 'write')
+}
+
 describe('definePlugin', () => {
   let on: (event: string, handler: unknown) => void
-  // process.stdout.write is overloaded; vi.spyOn's key constraint excludes overloaded
-  // methods, so we use <any, any> to get a broadly-typed MockInstance that accepts
-  // the assignment and still supports .mockRestore() and toHaveBeenCalledWith().
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let stdoutSpy: ReturnType<typeof vi.spyOn<any, any>>
+  let stdoutSpy: ReturnType<typeof spyOnStdoutWrite>
 
   beforeEach(() => {
     on = vi.fn<(event: string, handler: unknown) => void>()
     // Suppress stdout for all tests to prevent seed lines from bleeding into
     // concurrent test output from other files
-    stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true)
+    stdoutSpy = spyOnStdoutWrite().mockImplementation(() => true)
   })
 
   afterEach(() => {
