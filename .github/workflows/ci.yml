@@ -16,6 +16,12 @@ jobs:
         include:
           # Stable: failures block the run.
           # Add new versions as they reach LTS; drop them when they go EOL.
+          #
+          # '22.2.0' pins the literal floor from engines.node in package.json —
+          # '22' alone would resolve to the latest 22.x patch (via check-latest
+          # below) and never actually exercise the claimed minimum.
+          - node-version: '22.2.0'
+            experimental: false
           - node-version: '22'
             experimental: false
           - node-version: '24'

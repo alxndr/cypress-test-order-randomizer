@@ -2,7 +2,7 @@
 
 ## Local development
 
-Targeting NodeJS >= v22 and NPM >= 11.10.
+Targeting NodeJS >= v22.2 and NPM >= 11.10.
 
 ```sh
 git clone git@github.com:alxndr/cypress-test-order-randomizer.git

@@ -16,7 +16,7 @@ TLDR: it can help make test suites more robust.
 
 ## Installation
 
-Requires Node.js ≥ 22.
+Requires Node.js ≥ 22.2.x.
 
 ```sh
 npm install --save-dev cypress-test-order-randomizer
