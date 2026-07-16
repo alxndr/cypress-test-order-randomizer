@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Upgraded `esbuild`, `oxlint`, & `vitest`
+- Upgraded `vitest` to v4, including a minor refactor to tests to work with TypeScript and avoid disabling an ESLint rule
+- Upgraded `esbuild` & `oxlint` minor versions
 - Upgraded packages used in CI ([#12](https://github.com/alxndr/cypress-test-order-randomizer/pull/12))
 - Specify in `CONTRIBUTING.md` that tagging releases is required
 - Add a link to `CHANGELOG.md`
