@@ -50,8 +50,9 @@ jobs:
             experimental: false
           - node-version: '24'
             experimental: false
-          # Nightly/pre-release: failures are visible but do not block the run.
-          - node-version: '25'
+          # Current, not yet LTS (expected ~Oct 2026): failures are visible
+          # but do not block the run.
+          - node-version: '26'
             experimental: true
     steps:
       - uses: actions/checkout@v7

@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Use Node.js v26 rather than v25 in the e2e testing matrix
 - Adjust CI to use the different versions of Node.js on e2e testing only, not for typecheck/lint/unit-tests
 - Added Node v22.2.0 exact version to the CI testing matrix
 - Updated docs (`CONTRIBUTING.md`, `README.md`) to note that v22.2.0 is the lowest-supported Node version
