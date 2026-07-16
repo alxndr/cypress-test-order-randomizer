@@ -13,10 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Cypress v15.17.0 started using strict Node ESM loading,
-  which causes the `import {glob} from 'fast-glob'` line in
+- [Cypress v15.17.0 (released 2026-06-09)](https://github.com/cypress-io/cypress/releases/tag/v15.17.0)
+  started using strict Node ESM loading, which causes the `import {glob} from 'fast-glob'` line in
   [the `file-randomizer.ts` of v1.0.0](https://github.com/alxndr/cypress-test-order-randomizer/blob/adf4e9e34a864/src/file-randomizer.ts#L1)
-  to throw an error when running Cypress.
+  to throw an error when running Cypress. This was fixed by replacing `fast-glob`
+  with Node's `fs.promises.glob`; see the **Changed** section below.
   - The error looks like this on MacOS:
      ```
      Your configFile is invalid: /[path-to-repo]/cypress.config.ts

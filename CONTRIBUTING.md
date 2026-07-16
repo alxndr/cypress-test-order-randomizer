@@ -94,8 +94,8 @@ The npm dist-tag is inferred automatically from the version string in
   ```
 - [ ] Verify: `npm info cypress-test-order-randomizer` should show the new
   version under the `beta` dist-tag
-- [ ] Optionally tag the release commit for reference (the workflow itself
-  doesn't create git tags or GitHub releases):
+- [ ] Tag the release commit — the workflow itself doesn't create git tags or
+  GitHub releases, so this step is on you, always:
   ```sh
   git tag v0.2.0-beta.1
   git push origin v0.2.0-beta.1
