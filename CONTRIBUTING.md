@@ -39,7 +39,7 @@ test/
 
 | Script | What it does |
 |---|---|
-| `npm run lint` | oxlint on `src/` and `test/` |
+| `npm run lint` | oxlint on `src/` and `test/`, plus `github-actionlint` on `.github/workflows/` |
 | `npm run typecheck` | `tsc --noEmit` across src and test |
 | `npm run test:unit` | Vitest unit tests |
 | `npm run test:watch` | Vitest in watch mode — reruns affected tests on file save |

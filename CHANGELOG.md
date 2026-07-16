@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added the package `github-actionlint` for verifying the validity of the YAML files in `.github/workflows/`, and hooked it up to the `lint` task
+
 ### Changed
 
 - Added Node v22.2.0 exact version to the CI testing matrix
