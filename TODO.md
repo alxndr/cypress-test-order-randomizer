@@ -37,3 +37,22 @@ Debugging unusual behavior when using this plugin with a `--spec` glob; the shuf
 ```
 
 It would be more user-friendly if we didn't require users to modify their current task definitions ...
+
+
+## ops / CI
+
+### canary test against Cypress `@latest`
+
+Cypress 15.17.0 silently broke this plugin (strict Node ESM loading turned a
+CJS/ESM export mismatch in a dependency into a hard crash) — we didn't find
+out until a consumer hit it in the wild on 15.18.1. Nothing in CI would have
+caught this ahead of time: `ci.yml`'s e2e job only ever tests against
+whatever Cypress version is pinned in `devDependencies`.
+
+Idea: a separate scheduled workflow (weekly? monthly?) that installs
+`cypress@latest` (not the pinned version) and runs `test:e2e` against it —
+independent of the publish process, just to surface a future Cypress release
+breaking this plugin before a user reports it. Deliberately *not* part of
+`publish.yml` — that gate should stay fast and only concern itself with "is
+the commit being published good," not "will some future upstream release
+break the already-published package."

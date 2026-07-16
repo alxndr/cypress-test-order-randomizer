@@ -8,8 +8,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [1.1.0] - 2026-07-15
+
+### Fixed
+
+- Cypress v15.17.0 started using strict Node ESM loading,
+  which causes the `import {glob} from 'fast-glob'` line in
+  [the `file-randomizer.ts` of v1.0.0](https://github.com/alxndr/cypress-test-order-randomizer/blob/adf4e9e34a864/src/file-randomizer.ts#L1)
+  to throw an error when running Cypress.
+  - The error looks like this on MacOS:
+     ```
+     Your configFile is invalid: /[path-to-repo]/cypress.config.ts
+
+     It threw an error when required, check the stack trace below:
+
+     file:///[path-to-repo]/node_modules/cypress-test-order-randomizer/dist/file-randomizer.js:1
+     import { glob } from 'fast-glob';
+            ^^^^
+     SyntaxError: The requested module 'fast-glob' does not provide an export named 'glob'
+       at #asyncInstantiate (node:internal/modules/esm/module_job:319:21)
+       at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+       at async ModuleJob.run (node:internal/modules/esm/module_job:422:5)
+       at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:661:26)
+       at async loadFile (/[path-to-cypress]/Cypress/15.18.1/Cypress.app/Contents/Resources/app/packages/server/lib/plugins/child/run_require_async_child.js:74:21)
+       at async EventEmitter.<anonymous> (/[path-to-cypress]/Cypress/15.18.1/Cypress.app/Contents/Resources/app/packages/server/lib/plugins/child/run_require_async_child.js:82:38)
+     ```
+
+- `engines.node` claimed `>=22.0.0`, but `fs.promises.glob` (see below) didn't
+  unflag until Node 22.2.0. Bumped to `>=22.2.0` to match reality.
+
 ### Changed
 
+- **Replaced the `fast-glob` dependency with Node's built-in
+  `fs.promises.glob`.** The CJS/ESM export mismatch above was a symptom of a
+  broader fragility in `fast-glob` (a CJS-only package whose named exports
+  are runtime-attached properties, invisible to strict ESM loaders) — rather
+  than just patch around one instance of it, the dependency is gone
+  entirely, along with that whole class of bug. No change to
+  `resolveSpecFiles`'s behavior or this package's public API.
+- upgraded Cypress (devDependency, used for this package's own e2e tests) to
+  15.18.1
+- `test/e2e.mjs` gained a fast preflight check that loads the built
+  `dist/index.js` under plain `node --input-type=module`, independent of
+  Cypress's own (version-dependent) config-loading behavior, so this class
+  of regression is caught immediately rather than only after a slow Cypress
+  run fails
 - upgraded Vitest to v3
 
 
@@ -146,7 +190,8 @@ Initial implementation.
   those pass, on a single Node.js version
 
 
-[Unreleased]: https://github.com/alxndr/cypress-test-order-randomizer/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/alxndr/cypress-test-order-randomizer/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/alxndr/cypress-test-order-randomizer/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/alxndr/cypress-test-order-randomizer/compare/v0.1.0-beta.3...1.0.0
 [0.1.0-beta.3]: https://github.com/alxndr/cypress-test-order-randomizer/compare/v0.1.0-beta.2...v0.1.0-beta.3
 [0.1.0-beta.2]: https://github.com/alxndr/cypress-test-order-randomizer/compare/v0.1.0-beta.1...v0.1.0-beta.2

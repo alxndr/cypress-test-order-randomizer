@@ -59,18 +59,22 @@ test/
 
 ## Maintainer: cutting a release
 
-Releases are published locally. Before any publish, verify your environment:
+Releases are published by the `Publish` GitHub Actions workflow
+(`.github/workflows/publish.yml`), not by running `npm publish` locally. It's
+a manual `workflow_dispatch` trigger restricted to the `main` branch, and it
+lints, typechecks, runs the unit tests, builds, and publishes itself using a
+repo-level `NPM_TOKEN` secret — there's nothing to configure locally.
 
-```sh
-npm whoami       # must return your npm username
-npm get registry # must return https://registry.npmjs.org/
-```
+It does **not** run `test:e2e` (no Cypress binary in that job) — run
+`npm run validate` locally, and confirm CI is green on `main`, before
+triggering a release.
 
-Then run the full validation suite:
+The npm dist-tag is inferred automatically from the version string in
+`package.json`:
 
-```sh
-npm run validate
-```
+- `1.2.0` (no prerelease identifier) → published under `latest`
+- `1.2.0-beta.1` (or any `x.y.z-word...` shape) → published under the
+  `word` dist-tag (e.g. `beta`)
 
 ### Prerelease (e.g. `0.2.0-beta.1`)
 
@@ -80,20 +84,22 @@ npm run validate
   - Rename `[Unreleased]` to `[0.2.0-beta.1] - YYYY-MM-DD`
   - Add a fresh empty `[Unreleased]` section above it
   - Update the comparison links at the bottom of the file
+- [ ] Run `npm run validate` locally
 - [ ] Commit the version bump: `git commit -am "ops: bump prerelease version 0.2.0-beta.1"`
-- [ ] Merge to `main`
-- [ ] Tag and push:
+- [ ] Merge to `main` and confirm CI is green
+- [ ] Trigger the `Publish` workflow on `main` — from the GitHub UI
+  (Actions → Publish → Run workflow), or:
+  ```sh
+  gh workflow run publish.yml --ref main
+  ```
+- [ ] Verify: `npm info cypress-test-order-randomizer` should show the new
+  version under the `beta` dist-tag
+- [ ] Optionally tag the release commit for reference (the workflow itself
+  doesn't create git tags or GitHub releases):
   ```sh
   git tag v0.2.0-beta.1
   git push origin v0.2.0-beta.1
   ```
-- [ ] Publish:
-  ```sh
-  npm publish --tag beta
-  ```
-  `prepublishOnly` runs some checks and then `npm run build && npm pack --dry-run` automatically.
-- [ ] Verify: `npm info cypress-test-order-randomizer` should show the new
-  version under the `beta` dist-tag
 
 Users install a prerelease with e.g.: `npm install cypress-test-order-randomizer@beta`
 
@@ -101,7 +107,8 @@ Users install a prerelease with e.g.: `npm install cypress-test-order-randomizer
 
 Follow the same checklist as a prerelease, with these differences:
 
-- Omit `--tag prereleaseName` when publishing — `latest` is the default and is what plain `npm install` resolves to
+- Use a version with no prerelease identifier (e.g. `1.1.0`, not `1.1.0-beta`) —
+  the workflow will infer the `latest` dist-tag from that automatically
 - Verify the `latest` dist-tag updated in `npm info cypress-test-order-randomizer`
 
 Users install the latest stable release with: `npm install cypress-test-order-randomizer`
